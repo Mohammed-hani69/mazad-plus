@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>فاتورة مشتريات - {{ purchase.invoice_number }}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3/dist/JsBarcode.all.min.js"></script>
+  <style>
+    @page { margin: 0; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Cairo', sans-serif; background: #e8f5e9; padding: 20px; direction: rtl; position: relative; }
+    .watermark { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg); font-size: 60px; font-weight: 900; color: rgba(16,185,129,0.06); pointer-events: none; z-index: 0; white-space: nowrap; letter-spacing: 4px; }
+    .invoice-wrapper { max-width: 210mm; margin: 0 auto; background: white; border-radius: 16px; box-shadow: 0 8px 30px rgba(16,185,129,0.12); overflow: hidden; position: relative; z-index: 1; }
+    .invoice-header { background: linear-gradient(135deg, #059669, #10b981); color: white; padding: 25px 30px; position: relative; }
+    .invoice-header::after { content: ''; position: absolute; bottom: -20px; right: 0; left: 0; height: 40px; background: white; border-radius: 50% 50% 0 0; }
+    .invoice-top-row { display: flex; justify-content: space-between; align-items: center; }
+    .invoice-logo-area { display: flex; align-items: center; gap: 12px; }
+    .invoice-logo-icon { width: 50px; height: 50px; background: rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; overflow: hidden; }
+    .invoice-logo-icon img { width: 100%; height: 100%; object-fit: contain; padding: 4px; }
+    .invoice-store-name { font-size: 22px; font-weight: 800; }
+    .invoice-store-name small { font-size: 12px; font-weight: 400; opacity: 0.8; display: block; }
+    .invoice-badge { background: rgba(255,255,255,0.2); padding: 8px 20px; border-radius: 30px; text-align: center; }
+    .invoice-badge h2 { font-size: 20px; font-weight: 800; }
+    .invoice-badge span { font-size: 11px; opacity: 0.8; }
+    .invoice-meta { display: flex; gap: 16px; margin-top: 16px; flex-wrap: wrap; }
+    .invoice-meta .meta-item { background: rgba(255,255,255,0.1); padding: 6px 14px; border-radius: 20px; font-size: 12px; }
+    .status-badge { padding: 4px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; height: fit-content; }
+    .status-paid { background: #d1fae5; color: #059669; }
+    .status-partial { background: #fef3c7; color: #d97706; }
+    .status-unpaid { background: #fee2e2; color: #dc2626; }
+    .invoice-body { padding: 30px 30px 20px; }
+    .invoice-customer-card { background: #fffbeb; border-radius: 12px; padding: 14px 18px; margin-bottom: 20px; display: flex; justify-content: space-between; border-right: 4px solid #f59e0b; }
+    .customer-info h5 { font-size: 13px; color: var(--text-muted); margin-bottom: 2px; }
+    .customer-info p { font-size: 16px; font-weight: 700; }
+    .customer-info small { font-size: 12px; color: #6b7280; }
+    .invoice-table { width: 100%; border-collapse: separate; border-spacing: 0 4px; margin-bottom: 16px; }
+    .invoice-table th { font-size: 12px; font-weight: 700; color: #6b7280; padding: 8px 12px; text-align: center; }
+    .invoice-table td { background: #f8fafc; padding: 10px 12px; font-size: 14px; text-align: center; }
+    .invoice-table tr td:first-child { border-radius: 8px 0 0 8px; }
+    .invoice-table tr td:last-child { border-radius: 0 8px 8px 0; }
+    .invoice-summary { display: flex; justify-content: space-between; align-items: flex-start; margin-top: 16px; }
+    .invoice-notes { font-size: 13px; color: #6b7280; }
+    .invoice-notes h5 { font-size: 14px; font-weight: 700; color: #1f2937; margin-bottom: 4px; }
+    .invoice-totals-card { background: #fffbeb; border-radius: 12px; padding: 16px 20px; min-width: 220px; }
+    .invoice-totals-card .row-line { display: flex; justify-content: space-between; padding: 3px 0; font-size: 14px; }
+    .invoice-totals-card .row-line.total { font-size: 20px; font-weight: 900; color: #d97706; border-top: 2px solid #d97706; margin-top: 6px; padding-top: 8px; }
+    .invoice-footer-text { text-align: center; padding: 16px 30px 20px; font-size: 13px; color: #6b7280; border-top: 2px dashed #e5e7eb; margin-top: 16px; }
+    .btn-print { display: block; width: 200px; margin: 20px auto; padding: 12px; background: #059669; color: white; border: none; border-radius: 30px; font-size: 16px; font-weight: 700; font-family: 'Cairo', sans-serif; cursor: pointer; }
+    .btn-print:hover { background: #047857; transform: translateY(-2px); box-shadow: 0 4px 15px rgba(5,150,105,0.3); }
+    @media print { body { padding: 0; background: white; } .invoice-wrapper { box-shadow: none; border-radius: 0; } .btn-print { display: none; } .watermark { color: rgba(16,185,129,0.08); } }
+    @media (max-width: 767px) { .invoice-header { padding: 20px; } .invoice-header-top { flex-direction: column; gap: 12px; align-items: flex-start; } .invoice-title-box { text-align: right; width: 100%; } .invoice-title-box h2 { font-size: 24px; } .invoice-header-info { flex-direction: column; gap: 8px; } .invoice-body { padding: 20px; } .invoice-parties { flex-direction: column; gap: 12px; } .invoice-summary { flex-direction: column; gap: 16px; } .invoice-totals { text-align: right; width: 100%; } .invoice-table th, .invoice-table td { padding: 8px 10px; font-size: 12px; } .btn-print { width: 100%; } }
+    @media (max-width: 575px) { body { padding: 10px; } .invoice-header { padding: 16px; } .invoice-body { padding: 14px; } .invoice-title-box h2 { font-size: 20px; } .invoice-table th, .invoice-table td { padding: 6px 8px; font-size: 11px; } .invoice-totals .total-row { gap: 16px; font-size: 12px; } }
+  </style>
+</head>
+<body>
+  <div class="watermark">مدعوم من مزاد بلس</div>
+  <button class="btn-print" onclick="window.print()"><i class="fas fa-print"></i> طباعة الفاتورة</button>
+  <div class="invoice-wrapper">
+    <div class="invoice-header">
+      <div class="invoice-top-row">
+        <div class="invoice-logo-area">
+          <div class="invoice-logo-icon">
+            {% if settings.store_logo %}<img src="{{ settings.store_logo }}" alt="شعار">{% else %}📦{% endif %}
+          </div>
+          <div>
+            <div class="invoice-store-name">{{ settings.store_name or 'Mazad Plus' }}
+              <small>{{ settings.store_address or '' }}</small>
+            </div>
+          </div>
+        </div>
+        <div class="invoice-badge">
+          <h2>فاتورة مشتريات</h2>
+          <span>#{{ purchase.invoice_number }}</span>
+        </div>
+      </div>
+      <div class="invoice-meta">
+        <span class="meta-item">📅 {{ purchase.created_at.strftime('%Y-%m-%d') }}</span>
+        <span class="meta-item">🕐 {{ purchase.created_at.strftime('%H:%M') }}</span>
+        <span class="meta-item">👤 {{ purchase.user.full_name if purchase.user else '' }}</span>
+      </div>
+    </div>
+    <div class="invoice-body">
+      <div class="invoice-customer-card">
+        <div class="customer-info">
+          <h5>المورد</h5>
+          <p>{{ purchase.supplier.name if purchase.supplier else 'مورد' }}</p>
+          <small>{{ purchase.supplier.phone if purchase.supplier else '' }}</small>
+        </div>
+        <div class="customer-info" style="text-align:left;">
+          <h5>حالة الدفع</h5>
+          {% set s = 'paid' if purchase.paid >= purchase.total else ('partial' if purchase.paid > 0 else 'unpaid') %}
+          <span class="status-badge status-{{ s }}">{{ {'paid':'مدفوعة','partial':'مدفوعة جزئياً','unpaid':'غير مدفوعة'}[s] }}</span>
+          <small style="display:block;margin-top:4px;">المدفوع: {{ purchase.paid }} {{ settings.currency }}</small>
+          <small style="display:block;">المتبقي: {{ purchase.total - purchase.paid }} {{ settings.currency }}</small>
+        </div>
+      </div>
+
+      <table class="invoice-table">
+        <thead>
+          <tr><th>#</th><th>الصنف</th><th>الكمية</th><th>السعر</th><th>الإجمالي</th></tr>
+        </thead>
+        <tbody>
+          {% for pi in purchase.items %}
+          <tr>
+            <td>{{ loop.index }}</td>
+            <td style="font-weight:700;">{{ pi.item.name if pi.item else 'منتج' }}</td>
+            <td>{{ pi.quantity }}</td>
+            <td>{{ pi.price }} {{ settings.currency }}</td>
+            <td style="font-weight:700;color:#d97706;">{{ pi.total }} {{ settings.currency }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <div class="invoice-summary">
+        <div class="invoice-notes">
+          {% if purchase.note %}<h5>📝 ملاحظات</h5><p>{{ purchase.note }}</p>{% endif %}
+          {% if settings.tax_number %}<p style="margin-top:8px;">🏛 الرقم الضريبي: {{ settings.tax_number }}</p>{% endif %}
+        </div>
+        <div class="invoice-totals-card">
+          <div class="row-line total"><span>الإجمالي</span><span>{{ purchase.total }} {{ settings.currency }}</span></div>
+          <div class="row-line" style="font-size:13px;border-top:1px dashed #fef3c7;margin-top:4px;padding-top:4px;"><span>المدفوع</span><span>{{ purchase.paid }} {{ settings.currency }}</span></div>
+          <div class="row-line" style="font-size:13px;color:#6b7280;"><span>المتبقي</span><span>{{ purchase.total - purchase.paid }} {{ settings.currency }}</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="invoice-footer-text">
+      <div style="text-align:center;margin-bottom:10px;">
+        <canvas id="barcode" style="max-width:200px;height:auto;"></canvas>
+      </div>
+      {{ settings.invoice_footer or 'شكراً لتعاملكم معنا' }}<br>
+      {% if settings.store_phone %}📞 {{ settings.store_phone }}{% endif %}
+      {% if settings.store_email %} | ✉ {{ settings.store_email }}{% endif %}
+    </div>
+  </div>
+  <script>
+    {% if purchase.barcode %}
+    try {
+      JsBarcode('#barcode', '{{ purchase.barcode }}', { format:'code128', width:1.5, height:40, displayValue:true, font:'Cairo', fontSize:14 });
+    } catch(e) {}
+    {% endif %}
+  </script>
+</body>
+</html>

@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>المخازن - Mazad Plus</title>
+  <link rel="icon" href="{{ url_for('static', filename='favicon.png') }}">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    .page-header h3 { font-weight: 700; margin: 0; }
+    .page-body { background: white; border-radius: 12px; border: 1px solid var(--border-color); box-shadow: var(--shadow-card); overflow: hidden; }
+    .table { margin: 0; }
+    .table thead th { background: #f8f9fc; font-size: 13px; font-weight: 700; color: var(--text-secondary); border-bottom: 2px solid var(--border-color); padding: 12px 16px; }
+    .table tbody td { font-size: 14px; padding: 12px 16px; vertical-align: middle; border-color: var(--border-light); }
+    .table tbody tr:hover { background: #f8f9fc; }
+    .btn-action { width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; transition: all 0.2s; }
+    .btn-edit { color: var(--primary); background: var(--primary-bg); }
+    .btn-edit:hover { background: var(--primary); color: white; }
+    .btn-delete { color: #ef4444; background: #fef2f2; }
+    .btn-delete:hover { background: #ef4444; color: white; }
+    .btn-add { background: var(--primary); color: white; padding: 10px 22px; border-radius: 8px; font-weight: 600; border: none; transition: all 0.3s; }
+    .btn-add:hover { background: var(--primary-dark); transform: translateY(-2px); box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3); }
+    .search-box-table { width: 250px; }
+    .search-box-table .form-control { border-radius: 8px; border: 2px solid var(--border-color); padding: 8px 14px; font-size: 13px; }
+    .search-box-table .form-control:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
+    .badge-status { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    .badge-active { background: #ecfdf5; color: #10b981; }
+    .badge-inactive { background: #fef2f2; color: #ef4444; }
+    .empty-table { text-align: center; padding: 60px 20px; color: var(--text-muted); }
+    .empty-table i { font-size: 48px; margin-bottom: 12px; display: block; }
+    .modal-content { border-radius: 12px; border: none; }
+    .modal-header { background: var(--primary); color: white; border-radius: 12px 12px 0 0; padding: 16px 20px; }
+    .modal-header .btn-close { filter: brightness(0) invert(1); }
+    .modal-body { padding: 20px; }
+    .modal-footer { border-top: 1px solid var(--border-color); padding: 12px 20px; }
+    .form-control-custom { border: 2px solid var(--border-color); border-radius: 8px; padding: 10px 14px; font-size: 14px; }
+    .form-control-custom:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
+    .form-label-custom { font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px; }
+    .btn-export { width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; font-size: 16px; transition: all 0.2s; text-decoration: none !important; }
+    .btn-excel { color: #10b981; background: #ecfdf5; }
+    .btn-excel:hover { background: #10b981; color: white !important; }
+    .btn-pdf { color: #ef4444; background: #fef2f2; }
+    .btn-pdf:hover { background: #ef4444; color: white !important; }
+    @media (max-width: 767px) { .page-header { flex-direction: column; gap: 12px; align-items: stretch; } .search-box-table { width: 100%; } }
+  </style>
+</head>
+<body>
+  <div class="dashboard-wrapper">
+    {% include 'sidebar.html' %}
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <main class="main-content" id="mainContent">
+      {% include 'navbar.html' %}
+      <div class="page-content">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category }} alert-dismissible fade show" style="border-radius:10px;">{{ message }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <div class="page-header">
+          <h3><i class="fas fa-warehouse" style="color:var(--primary);margin-left:8px;"></i>المخازن <i class="fas fa-question-circle help-icon help-icon-sm" data-bs-toggle="popover" data-bs-content="إدارة المخازن والمستودعات - كل مخزن تابع لفرع محدد"></i></h3>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+            <div class="search-box-table">
+              <input type="text" class="form-control" id="tableSearch" placeholder="بحث عن مخزن..." oninput="filterTable(this.value)">
+            </div>
+            <a href="/export/stores/excel" class="btn-export btn-excel" title="تصدير Excel"><i class="fas fa-file-excel"></i></a>
+            <a href="/export/stores/pdf" class="btn-export btn-pdf" title="تصدير PDF"><i class="fas fa-file-pdf"></i></a>
+            <button class="btn-add" data-bs-toggle="modal" data-bs-target="#addModal"><i class="fas fa-plus"></i> إضافة مخزن</button>
+          </div>
+        </div>
+
+        <div class="page-body">
+          <div class="table-responsive">
+            <table class="table" id="dataTable">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>الاسم</th>
+                  <th>الفرع</th>
+                  <th>المدير</th>
+                  <th>العنوان</th>
+                  <th>الحالة</th>
+                  <th>الإجراءات</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% if stores %}
+                  {% for s in stores %}
+                  <tr>
+                    <td>{{ s.id }}</td>
+                    <td><strong>{{ s.name }}</strong></td>
+                    <td>{{ s.branch.name if s.branch else '-' }}</td>
+                    <td>{{ s.manager or '-' }}</td>
+                    <td>{{ s.address or '-' }}</td>
+                    <td><span class="badge-status {{ 'badge-active' if s.is_active else 'badge-inactive' }}">{{ 'نشط' if s.is_active else 'غير نشط' }}</span></td>
+                    <td>
+                      <button class="btn-action btn-edit" onclick="editStore({{ s.id }}, '{{ s.name }}', {{ s.branch_id or 'null' }}, '{{ s.manager or '' }}', '{{ s.address or '' }}')" title="تعديل"><i class="fas fa-edit"></i></button>
+                      <button class="btn-action btn-delete" onclick="confirmDelete({{ s.id }}, '{{ s.name }}')" title="حذف"><i class="fas fa-trash"></i></button>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                {% else %}
+                  <tr><td colspan="7"><div class="empty-table"><i class="fas fa-warehouse"></i><p>لا يوجد مخازن بعد</p></div></td></tr>
+                {% endif %}
+              </tbody>
+            </table>
+          </div>
+        {% include '_pagination.html' %}
+        </div>
+      </div>
+      {% include 'footer.html' %}
+    </main>
+  </div>
+
+  <div class="modal fade" id="addModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header"><h5 class="modal-title"><i class="fas fa-plus"></i> إضافة مخزن</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+        <form method="POST" action="{{ url_for('store_add') }}">
+          <div class="modal-body">
+            <div class="mb-3"><label class="form-label-custom">الاسم <span class="text-danger">*</span></label><input type="text" name="name" class="form-control form-control-custom" required placeholder="اسم المخزن"></div>
+            <div class="mb-3"><label class="form-label-custom">الفرع التابع له</label>
+              <select name="branch_id" class="form-control form-control-custom">
+                <option value="">-- اختر الفرع --</option>
+                {% for b in branches %}
+                  <option value="{{ b.id }}">{{ b.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="mb-3"><label class="form-label-custom">المدير</label><input type="text" name="manager" class="form-control form-control-custom" placeholder="اسم المدير"></div>
+            <div class="mb-0"><label class="form-label-custom">العنوان</label><textarea name="address" class="form-control form-control-custom" rows="2" placeholder="العنوان"></textarea></div>
+          </div>
+          <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button><button type="submit" class="btn btn-primary" style="background:var(--primary);border:none;"><i class="fas fa-save"></i> حفظ</button></div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="editModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header"><h5 class="modal-title"><i class="fas fa-edit"></i> تعديل المخزن</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+        <form method="POST" action="" id="editForm">
+          <div class="modal-body">
+            <div class="mb-3"><label class="form-label-custom">الاسم <span class="text-danger">*</span></label><input type="text" name="name" id="editName" class="form-control form-control-custom" required></div>
+            <div class="mb-3"><label class="form-label-custom">الفرع التابع له</label>
+              <select name="branch_id" id="editBranch" class="form-control form-control-custom">
+                <option value="">-- اختر الفرع --</option>
+                {% for b in branches %}
+                  <option value="{{ b.id }}">{{ b.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="mb-3"><label class="form-label-custom">المدير</label><input type="text" name="manager" id="editManager" class="form-control form-control-custom"></div>
+            <div class="mb-0"><label class="form-label-custom">العنوان</label><textarea name="address" id="editAddress" class="form-control form-control-custom" rows="2"></textarea></div>
+          </div>
+          <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button><button type="submit" class="btn btn-primary" style="background:var(--primary);border:none;"><i class="fas fa-save"></i> حفظ التغييرات</button></div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+      <div class="modal-content">
+        <div class="modal-header" style="background:#ef4444;"><h5 class="modal-title"><i class="fas fa-exclamation-triangle"></i> تأكيد الحذف</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+        <form method="POST" action="" id="deleteForm">
+          <div class="modal-body text-center py-4">
+            <i class="fas fa-trash" style="font-size:36px;color:#ef4444;margin-bottom:12px;"></i>
+            <p>هل أنت متأكد من حذف <strong id="deleteItemName"></strong>؟</p>
+          </div>
+          <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button><button type="submit" class="btn btn-danger"><i class="fas fa-trash"></i> حذف</button></div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+  <script>
+    function filterTable(val) {
+      document.querySelectorAll('#dataTable tbody tr').forEach(r => {
+        if (r.querySelector('td:first-child .empty-table')) return;
+        r.style.display = r.textContent.toLowerCase().includes(val.toLowerCase()) ? '' : 'none';
+      });
+    }
+    function editStore(id, name, branchId, manager, address) {
+      document.getElementById('editName').value = name;
+      if (branchId) document.getElementById('editBranch').value = branchId;
+      document.getElementById('editManager').value = manager;
+      document.getElementById('editAddress').value = address;
+      document.getElementById('editForm').action = '/stores/edit/' + id;
+      new bootstrap.Modal(document.getElementById('editModal')).show();
+    }
+    function confirmDelete(id, name) {
+      document.getElementById('deleteItemName').textContent = name;
+      document.getElementById('deleteForm').action = '/stores/delete/' + id;
+      new bootstrap.Modal(document.getElementById('deleteModal')).show();
+    }
+  </script>
+</body>
+</html>

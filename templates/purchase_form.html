@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ 'فاتورة مشتريات' if not purchase else 'عرض فاتورة' }} - Mazad Plus</title>
+  <link rel="icon" href="{{ url_for('static', filename='favicon.png') }}">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    .page-header h3 { font-weight: 700; margin: 0; }
+    .invoice-card { background: white; border-radius: 12px; border: 1px solid var(--border-color); box-shadow: var(--shadow-card); overflow: hidden; }
+    .invoice-header { padding: 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
+    .invoice-body { padding: 20px; }
+    .invoice-footer { padding: 20px; border-top: 1px solid var(--border-color); }
+    .form-control-custom { border: 2px solid var(--border-color); border-radius: 8px; padding: 10px 14px; font-size: 14px; }
+    .form-control-custom:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
+    .form-label-custom { font-size: 13px; font-weight: 600; margin-bottom: 4px; display: block; }
+    .table-items th { background: #f8f9fc; font-size: 13px; font-weight: 700; color: var(--text-secondary); padding: 10px 12px; }
+    .table-items td { padding: 10px 12px; vertical-align: middle; }
+    .btn-remove-row { width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; color: #ef4444; background: #fef2f2; border: none; transition: all 0.2s; }
+    .btn-remove-row:hover { background: #ef4444; color: white; }
+    .btn-add-row { background: var(--primary-bg); color: var(--primary); border: 2px dashed var(--primary); border-radius: 8px; padding: 8px 16px; font-weight: 600; font-size: 13px; transition: all 0.3s; width: 100%; }
+    .btn-add-row:hover { background: var(--primary); color: white; }
+    .btn-save-invoice { background: var(--primary); color: white; padding: 12px 32px; border-radius: 8px; font-weight: 700; border: none; transition: all 0.3s; font-size: 15px; }
+    .btn-save-invoice:hover { background: var(--primary-dark); transform: translateY(-2px); box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3); }
+    .totals-box { background: #f8f9fc; border-radius: 10px; padding: 16px; }
+    .totals-box .row-line { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; }
+    .totals-box .row-line.total { border-top: 2px solid var(--border-color); margin-top: 8px; padding-top: 8px; font-size: 18px; font-weight: 800; color: var(--primary); }
+    .readonly-field { background: #f8f9fc !important; }
+    @media (max-width: 767px) { .page-header { flex-direction: column; gap: 12px; align-items: stretch; } .invoice-header { flex-direction: column; gap: 12px; align-items: stretch; padding: 14px; } .invoice-body { padding: 14px; } .invoice-footer { padding: 14px; } .btn-save-invoice { width: 100%; justify-content: center; } }
+    @media (max-width: 575px) { .table-items th, .table-items td { padding: 6px 8px; font-size: 12px; } .btn-add-row { font-size: 12px; padding: 6px 12px; } }
+  </style>
+</head>
+<body>
+  <div class="dashboard-wrapper">
+    {% include 'sidebar.html' %}
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <main class="main-content" id="mainContent">
+      {% include 'navbar.html' %}
+      <div class="page-content">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category }} alert-dismissible fade show" style="border-radius:10px;">{{ message }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <div class="page-header">
+          <div>
+            <h3><i class="fas fa-shopping-cart" style="color:#f59e0b;margin-left:8px;"></i>
+              {% if edit_mode %}تعديل فاتورة مشتريات #{{ purchase.invoice_number }}
+              {% elif purchase %}فاتورة مشتريات #{{ purchase.invoice_number }}
+              {% else %}فاتورة مشتريات جديدة{% endif %}
+              <i class="fas fa-question-circle help-icon help-icon-sm" data-bs-toggle="popover" data-bs-content="تسجيل عملية شراء بضاعة من مورد وزيادة المخزون"></i>
+            </h3>
+            {% if purchase %}<small style="color:var(--text-muted);">تاريخ: {{ purchase.created_at.strftime('%Y-%m-%d %H:%M') }}</small>{% endif %}
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            {% if purchase and not edit_mode %}
+            <div class="dropdown" style="display:inline-block;">
+              <button class="btn btn-success dropdown-toggle" style="border-radius:8px;font-weight:600;" data-bs-toggle="dropdown">
+                <i class="fas fa-print"></i> طباعة
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end">
+                <li><a class="dropdown-item" href="{{ url_for('purchase_print', id=purchase.id, template_id=1) }}" target="_blank"><i class="fas fa-file-invoice" style="color:var(--primary);"></i> قالب كلاسيك</a></li>
+                <li><a class="dropdown-item" href="{{ url_for('purchase_print', id=purchase.id, template_id=2) }}" target="_blank"><i class="fas fa-file-invoice" style="color:#10b981;"></i> قالب عصري</a></li>
+                <li><a class="dropdown-item" href="{{ url_for('purchase_print', id=purchase.id, template_id=3) }}" target="_blank"><i class="fas fa-receipt" style="color:#f59e0b;"></i> قالب احترافي</a></li>
+              </ul>
+            </div>
+            {% endif %}
+            <a href="{{ url_for('purchases_list') }}" class="btn btn-secondary" style="border-radius:8px;"><i class="fas fa-arrow-right"></i> العودة</a>
+          </div>
+        </div>
+
+        <form method="POST" action="{{ url_for('purchase_edit', id=purchase.id) if edit_mode else url_for('purchase_add') }}" id="invoiceForm">
+          <div class="invoice-card">
+            <div class="invoice-header">
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;width:100%;">
+                <div>
+                  <label class="form-label-custom">المورد <span class="text-danger">*</span> <i class="fas fa-question-circle help-icon help-icon-sm" data-bs-toggle="popover" data-bs-content="اختر المورد الذي تم الشراء منه"></i></label>
+                  <select name="supplier_id" class="form-control form-control-custom" {{ 'disabled' if purchase and not edit_mode }} required>
+                    <option value="">-- اختر المورد --</option>
+                    {% for s in suppliers %}
+                      <option value="{{ s.id }}" {{ 'selected' if purchase and purchase.supplier_id == s.id }}>{{ s.name }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div>
+                  <label class="form-label-custom">المخزن <span class="text-danger">*</span> <i class="fas fa-question-circle help-icon help-icon-sm" data-bs-toggle="popover" data-bs-content="اختر المخزن الذي ستُضاف إليه البضاعة"></i></label>
+                  <select name="store_id" class="form-control form-control-custom" {{ 'disabled' if purchase and not edit_mode }} required>
+                    <option value="">-- اختر المخزن --</option>
+                    {% for s in stores %}
+                      <option value="{{ s.id }}" {{ 'selected' if purchase and purchase.store_id == s.id }}>{{ s.name }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="invoice-body">
+              <div style="margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;">
+                <strong style="font-size:15px;">الأصناف <i class="fas fa-question-circle help-icon help-icon-sm" data-bs-toggle="popover" data-bs-content="أضف الأصناف المشتراة مع الكميات والأسعار. يمكنك إضافة عدة أصناف"></i></strong>
+                {% if not purchase or edit_mode %}
+                <button type="button" class="btn-add-row" id="addRowBtn" style="width:auto;"><i class="fas fa-plus"></i> إضافة صنف</button>
+                {% endif %}
+              </div>
+              <div class="table-responsive">
+                <table class="table table-items" id="itemsTable">
+                  <thead>
+                    <tr>
+                      <th style="width:40%;">الصنف</th>
+                      <th style="width:20%;">الكمية</th>
+                      <th style="width:20%;">السعر</th>
+                      <th style="width:15%;">الإجمالي</th>
+                      {% if not purchase or edit_mode %}<th style="width:5%;"></th>{% endif %}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% if purchase and purchase.items and not edit_mode %}
+                      {% for pi in purchase.items %}
+                      <tr>
+                        <td>{{ pi.item.name if pi.item else '-' }}</td>
+                        <td>{{ pi.quantity }}</td>
+                        <td>{{ pi.price }} ج.م</td>
+                        <td>{{ pi.total }} ج.م</td>
+                      </tr>
+                      {% endfor %}
+                    {% else %}
+                      {% if edit_mode and purchase and purchase.items %}
+                        {% for pi in purchase.items %}
+                        <tr>
+                          <td>
+                            <select name="item_id[]" class="form-control form-control-custom">
+                              <option value="">-- اختر الصنف --</option>
+                              {% for i in items %}
+                                <option value="{{ i.id }}" {{ 'selected' if pi.item_id == i.id }}>{{ i.name }}</option>
+                              {% endfor %}
+                            </select>
+                          </td>
+                          <td><input type="number" name="quantity[]" class="form-control form-control-custom" value="{{ pi.quantity }}" min="1" oninput="calcRow(this)"></td>
+                          <td><input type="number" name="price[]" class="form-control form-control-custom" value="{{ pi.price }}" step="0.01" oninput="calcRow(this)"></td>
+                          <td><span class="row-total">{{ pi.total }} ج.م</span></td>
+                          <td><button type="button" class="btn-remove-row" onclick="this.closest('tr').remove();calcTotal();"><i class="fas fa-times"></i></button></td>
+                        </tr>
+                        {% endfor %}
+                      {% else %}
+                      <tr>
+                        <td>
+                          <select name="item_id[]" class="form-control form-control-custom">
+                            <option value="">-- اختر الصنف --</option>
+                            {% for i in items %}
+                              <option value="{{ i.id }}">{{ i.name }}</option>
+                            {% endfor %}
+                          </select>
+                        </td>
+                        <td><input type="number" name="quantity[]" class="form-control form-control-custom" value="1" min="1" oninput="calcRow(this)"></td>
+                        <td><input type="number" name="price[]" class="form-control form-control-custom" value="0" step="0.01" oninput="calcRow(this)"></td>
+                        <td><span class="row-total">0 ج.م</span></td>
+                        <td><button type="button" class="btn-remove-row" onclick="this.closest('tr').remove();calcTotal();"><i class="fas fa-times"></i></button></td>
+                      </tr>
+                      {% endif %}
+                    {% endif %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="invoice-footer">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+                <div>
+                  <label class="form-label-custom">ملاحظات <i class="fas fa-question-circle help-icon help-icon-sm" data-bs-toggle="popover" data-bs-content="أي ملاحظات إضافية عن فاتورة الشراء"></i></label>
+                  <textarea name="note" class="form-control form-control-custom" rows="3" {{ 'readonly' if purchase and not edit_mode }}>{{ purchase.note if purchase else '' }}</textarea>
+                </div>
+                <div class="totals-box">
+                  <div class="row-line"><span>الإجمالي</span><span id="totalDisplay">{{ purchase.total if purchase else 0 }} ج.م</span></div>
+                  <div class="row-line" style="border-top:2px solid var(--border-color);margin-top:8px;padding-top:8px;">
+                    <span style="font-weight:700;">حالة الدفع <i class="fas fa-question-circle help-icon help-icon-sm" data-bs-toggle="popover" data-bs-content="اختر حالة الدفع"></i></span>
+                    <select name="payment_status" id="paymentStatus" class="form-control form-control-custom" style="width:140px;display:inline-block;font-size:13px;padding:6px 10px;">
+                      <option value="unpaid" {{ 'selected' if (us and us.default_payment_status == 'unpaid') or (purchase and purchase.paid == 0) else '' }}>غير مدفوعة</option>
+                      <option value="paid" {{ 'selected' if (us and us.default_payment_status == 'paid') or (purchase and purchase.paid >= purchase.total) else '' }}>مدفوعة</option>
+                      <option value="partial" {{ 'selected' if (us and us.default_payment_status == 'partial') or (purchase and purchase.paid > 0 and purchase.paid < purchase.total) else '' }}>مدفوعة جزئياً</option>
+                    </select>
+                  </div>
+                  <div class="row-line">
+                    <span style="font-weight:700;">المبلغ المدفوع <i class="fas fa-question-circle help-icon help-icon-sm" data-bs-toggle="popover" data-bs-content="المبلغ الذي دفعته فعلاً للمورد - قد يكون كاملاً أو جزءاً"></i></span>
+                    {% if purchase and not edit_mode %}
+                      <span>{{ purchase.paid }} ج.م</span>
+                    {% else %}
+                      <input type="number" name="paid" id="paidAmount" class="form-control form-control-custom" value="{{ purchase.paid if purchase else 0 }}" step="0.01" style="width:120px;display:inline-block;">
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+              <input type="hidden" name="total" id="totalInput" value="{{ purchase.total if purchase else 0 }}">
+              <div style="text-align:left;margin-top:16px;">
+                {% if not purchase or edit_mode %}
+                <button type="submit" class="btn-save-invoice"><i class="fas fa-save"></i> {% if edit_mode %}حفظ التعديلات{% else %}حفظ الفاتورة{% endif %}</button>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      {% include 'footer.html' %}
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+  <script>
+    document.getElementById('addRowBtn')?.addEventListener('click', function() {
+      const tbody = document.querySelector('#itemsTable tbody');
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>
+          <select name="item_id[]" class="form-control form-control-custom">
+            <option value="">-- اختر الصنف --</option>
+            {% for i in items %}
+              <option value="{{ i.id }}">{{ i.name }}</option>
+            {% endfor %}
+          </select>
+        </td>
+        <td><input type="number" name="quantity[]" class="form-control form-control-custom" value="1" min="1" oninput="calcRow(this)"></td>
+        <td><input type="number" name="price[]" class="form-control form-control-custom" value="0" step="0.01" oninput="calcRow(this)"></td>
+        <td><span class="row-total">0 ج.م</span></td>
+        <td><button type="button" class="btn-remove-row" onclick="this.closest('tr').remove();calcTotal();"><i class="fas fa-times"></i></button></td>
+      `;
+      tbody.appendChild(row);
+    });
+
+    function calcRow(el) {
+      const tr = el.closest('tr');
+      const qty = parseFloat(tr.querySelector('[name="quantity[]"]').value) || 0;
+      const price = parseFloat(tr.querySelector('[name="price[]"]').value) || 0;
+      const total = qty * price;
+      tr.querySelector('.row-total').textContent = total.toFixed(2) + ' ج.م';
+      calcTotal();
+    }
+
+    function calcTotal() {
+      let total = 0;
+      document.querySelectorAll('.row-total').forEach(el => {
+        total += parseFloat(el.textContent) || 0;
+      });
+      document.getElementById('totalDisplay').textContent = total.toFixed(2) + ' ج.م';
+      document.getElementById('totalInput').value = total;
+      updatePaidFromStatus(total);
+    }
+
+    function updatePaidFromStatus(net) {
+      var status = document.getElementById('paymentStatus');
+      var paidInput = document.getElementById('paidAmount');
+      if (!status || !paidInput) return;
+      var netVal = net || parseFloat(document.getElementById('totalInput')?.value) || 0;
+      if (status.value === 'paid') {
+        paidInput.value = netVal.toFixed(2);
+      } else if (status.value === 'unpaid') {
+        paidInput.value = '0';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      var status = document.getElementById('paymentStatus');
+      if (status) {
+        status.addEventListener('change', function() {
+          updatePaidFromStatus();
+        });
+        setTimeout(function() {
+          var paidInput = document.getElementById('paidAmount');
+          if (paidInput && parseFloat(paidInput.value) === 0) {
+            updatePaidFromStatus();
+          }
+        }, 100);
+      }
+    });
+  </script>
+</body>
+</html>

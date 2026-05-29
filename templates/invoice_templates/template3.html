@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>فاتورة ضريبية - {{ sale.invoice_number }}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3/dist/JsBarcode.all.min.js"></script>
+  <style>
+    @page { margin: 0.3cm; size: A4; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Cairo', sans-serif; background: #ede9fe; padding: 20px; direction: rtl; position: relative; }
+    .watermark { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%) rotate(-30deg); font-size: 60px; font-weight: 900; color: rgba(139,92,246,0.06); pointer-events: none; z-index: 0; white-space: nowrap; letter-spacing: 4px; }
+    .invoice-wrapper { max-width: 210mm; margin: 0 auto; background: white; box-shadow: 0 8px 40px rgba(139,92,246,0.15); position: relative; z-index: 1; }
+    .invoice-top-border { height: 6px; background: linear-gradient(90deg, #8b5cf6, #6366f1, #4f46e5); }
+    .invoice-header { padding: 30px 35px 20px; display: flex; justify-content: space-between; border-bottom: 3px double #e5e7eb; }
+    .header-right { display: flex; align-items: center; gap: 16px; }
+    .header-right .logo-wrap { width: 60px; height: 60px; border-radius: 12px; overflow: hidden; flex-shrink: 0; }
+    .header-right .logo-wrap img { width: 100%; height: 100%; object-fit: contain; }
+    .header-right .store-text h1 { font-size: 14px; font-weight: 700; color: #8b5cf6; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 4px; }
+    .header-right .store-text h2 { font-size: 26px; font-weight: 900; color: #1f2937; }
+    .header-right .store-text .store-detail { font-size: 13px; color: #6b7280; display: block; }
+    .header-left { text-align: left; }
+    .header-left .invoice-label { font-size: 11px; color: #9ca3af; font-weight: 600; }
+    .header-left .invoice-number { font-size: 20px; font-weight: 800; color: #8b5cf6; }
+    .header-left .invoice-date { font-size: 13px; color: #6b7280; }
+    .payment-badge { display: inline-block; padding: 2px 10px; border-radius: 4px; font-size: 12px; font-weight: 700; }
+    .payment-paid { background: #d1fae5; color: #059669; }
+    .payment-partial { background: #fef3c7; color: #d97706; }
+    .payment-unpaid { background: #fee2e2; color: #dc2626; }
+    .info-section { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border-bottom: 1px solid #e5e7eb; }
+    .info-box { padding: 16px 35px; }
+    .info-box:first-child { border-left: 1px solid #e5e7eb; }
+    .info-box h5 { font-size: 11px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+    .info-box p { font-size: 15px; font-weight: 700; color: #1f2937; }
+    .info-box small { font-size: 12px; color: #6b7280; display: block; }
+    .invoice-body { padding: 20px 35px; }
+    .invoice-table { width: 100%; border-collapse: collapse; }
+    .invoice-table th { background: #1f2937; color: white; font-size: 12px; font-weight: 700; padding: 10px 14px; text-align: center; }
+    .invoice-table th:first-child { border-radius: 0 8px 0 0; }
+    .invoice-table th:last-child { border-radius: 8px 0 0 0; }
+    .invoice-table td { padding: 10px 14px; border-bottom: 1px solid #f3f4f6; font-size: 14px; text-align: center; }
+    .invoice-table tbody tr:nth-child(even) { background: #f8f9fc; }
+    .invoice-footer-box { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border-top: 2px solid #1f2937; margin-top: 16px; }
+    .footer-box { padding: 16px 35px; }
+    .footer-box:first-child { border-left: 1px solid #e5e7eb; }
+    .footer-box h5 { font-size: 11px; font-weight: 700; color: #9ca3af; margin-bottom: 4px; }
+    .footer-box p { font-size: 13px; color: #6b7280; }
+    .totals-table { width: 100%; }
+    .totals-table td { padding: 6px 0; font-size: 14px; }
+    .totals-table td:last-child { text-align: left; font-weight: 700; }
+    .totals-table .final-row td { font-size: 22px; font-weight: 900; color: #8b5cf6; border-top: 2px solid #8b5cf6; padding-top: 8px; }
+    .invoice-stamp { text-align: center; padding: 20px 35px; border-top: 1px solid #e5e7eb; font-size: 12px; color: #6b7280; position: relative; }
+    .invoice-stamp .stamp-box { display: inline-block; border: 2px dashed #8b5cf6; border-radius: 8px; padding: 8px 24px; font-weight: 700; color: #8b5cf6; font-size: 14px; }
+    .btn-print { display: block; width: 200px; margin: 20px auto; padding: 12px; background: #8b5cf6; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; font-family: 'Cairo', sans-serif; cursor: pointer; transition: all 0.3s; }
+    .btn-print:hover { background: #7c3aed; transform: translateY(-2px); box-shadow: 0 4px 15px rgba(139,92,246,0.3); }
+    @media print { body { padding: 0; background: white; } .invoice-wrapper { box-shadow: none; } .btn-print { display: none; } .invoice-top-border { display: none; } .watermark { color: rgba(139,92,246,0.08); } }
+    @media (max-width: 767px) { .invoice-header { padding: 20px; } .invoice-header-top { flex-direction: column; gap: 12px; align-items: flex-start; } .invoice-title-box { text-align: right; width: 100%; } .invoice-title-box h2 { font-size: 24px; } .invoice-header-info { flex-direction: column; gap: 8px; } .invoice-body { padding: 20px; } .invoice-parties { flex-direction: column; gap: 12px; } .invoice-summary { flex-direction: column; gap: 16px; } .invoice-totals { text-align: right; width: 100%; } .invoice-table th, .invoice-table td { padding: 8px 10px; font-size: 12px; } .btn-print { width: 100%; } }
+    @media (max-width: 575px) { body { padding: 10px; } .invoice-header { padding: 16px; } .invoice-body { padding: 14px; } .invoice-title-box h2 { font-size: 20px; } .invoice-table th, .invoice-table td { padding: 6px 8px; font-size: 11px; } .invoice-totals .total-row { gap: 16px; font-size: 12px; } }
+  </style>
+</head>
+<body>
+  <div class="watermark">مدعوم من مزاد بلس</div>
+  <button class="btn-print" onclick="window.print()"><i class="fas fa-print"></i> طباعة الفاتورة</button>
+  <div class="invoice-wrapper">
+    <div class="invoice-top-border"></div>
+
+    <div class="invoice-header">
+      <div class="header-right">
+        {% if settings.store_logo %}
+        <div class="logo-wrap"><img src="{{ settings.store_logo }}" alt="شعار"></div>
+        {% endif %}
+        <div class="store-text">
+          <h1>{{ settings.store_name or 'Mazad Plus' }}</h1>
+          <h2>فاتورة ضريبية</h2>
+          <span class="store-detail">{{ settings.store_address or '' }}</span>
+          <span class="store-detail">📞 {{ settings.store_phone or '' }} | ✉ {{ settings.store_email or '' }}</span>
+          {% if settings.tax_number %}<span class="store-detail" style="font-weight:700;">الرقم الضريبي: {{ settings.tax_number }}</span>{% endif %}
+        </div>
+      </div>
+      <div class="header-left">
+        <span class="invoice-label">فاتورة رقم</span>
+        <div class="invoice-number">{{ sale.invoice_number }}</div>
+        <span class="invoice-date">{{ sale.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+        <br>
+        <span class="invoice-label" style="display:inline-block;margin-top:8px;">المستخدم</span>
+        <div style="font-size:14px;font-weight:600;">{{ sale.user.full_name if sale.user else '' }}</div>
+      </div>
+    </div>
+
+    <div class="info-section">
+      <div class="info-box">
+        <h5>العميل</h5>
+        <p>{{ sale.customer.name if sale.customer else 'عميل نقدي' }}</p>
+        <small>{{ sale.customer.phone if sale.customer else '' }}</small>
+        <small>{{ sale.customer.address if sale.customer else '' }}</small>
+      </div>
+      <div class="info-box">
+        <h5>بيانات الدفع</h5>
+        {% set s = 'paid' if sale.paid >= sale.total else ('partial' if sale.paid > 0 else 'unpaid') %}
+        <p>المدفوع: {{ sale.paid }} {{ settings.currency }}</p>
+        <small>حالة: <span class="payment-badge payment-{{ s }}">{{ {'paid':'مدفوعة','partial':'مدفوعة جزئياً','unpaid':'غير مدفوعة'}[s] }}</span></small>
+        <small>المتبقي: {{ sale.remaining }} {{ settings.currency }}</small>
+      </div>
+    </div>
+
+    <div class="invoice-body">
+      <table class="invoice-table">
+        <thead>
+          <tr><th>م</th><th>الصنف</th><th>الكمية</th><th>سعر الوحدة</th><th>الإجمالي</th></tr>
+        </thead>
+        <tbody>
+          {% for si in sale.items %}
+          <tr>
+            <td>{{ loop.index }}</td>
+            <td style="font-weight:700;text-align:start;">{{ si.item.name if si.item else 'منتج' }}</td>
+            <td>{{ si.quantity }}</td>
+            <td>{{ si.price }} {{ settings.currency }}</td>
+            <td>{{ si.total }} {{ settings.currency }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="invoice-footer-box">
+      <div class="footer-box">
+        {% if sale.note %}
+          <h5>ملاحظات</h5>
+          <p>{{ sale.note }}</p>
+        {% endif %}
+        {% if settings.invoice_footer %}
+          <h5>شكر</h5>
+          <p>{{ settings.invoice_footer }}</p>
+        {% endif %}
+      </div>
+      <div class="footer-box">
+        <table class="totals-table">
+          <tr><td>الإجمالي</td><td>{{ sale.total }} {{ settings.currency }}</td></tr>
+          {% if sale.discount > 0 %}<tr><td style="color:#ef4444;">الخصم</td><td style="color:#ef4444;">-{{ sale.discount }} {{ settings.currency }}</td></tr>{% endif %}
+          <tr><td>المدفوع</td><td>{{ sale.paid }} {{ settings.currency }}</td></tr>
+          {% if sale.remaining > 0 %}<tr><td style="color:#ef4444;">المتبقي</td><td style="color:#ef4444;">{{ sale.remaining }} {{ settings.currency }}</td></tr>{% endif %}
+          <tr class="final-row"><td>الصافي</td><td>{{ sale.total - sale.discount }} {{ settings.currency }}</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="invoice-stamp">
+      <div style="margin-bottom:10px;">
+        <canvas id="barcode" style="max-width:200px;height:auto;"></canvas>
+      </div>
+      <div class="stamp-box">ختم الفاتورة</div>
+      <br>
+      {{ settings.invoice_footer or 'شكراً لتسوقكم معنا' }}
+    </div>
+  </div>
+  <script>
+    {% if sale.barcode %}
+    try {
+      JsBarcode('#barcode', '{{ sale.barcode }}', { format:'code128', width:1.5, height:40, displayValue:true, font:'Cairo', fontSize:14 });
+    } catch(e) {}
+    {% endif %}
+  </script>
+</body>
+</html>

@@ -1,0 +1,49 @@
+{% macro page_url(page_num) %}
+  {%- if request.args.get('q') -%}
+    {{ url_for(request.endpoint, page=page_num, q=request.args.get('q')) }}
+  {%- else -%}
+    {{ url_for(request.endpoint, page=page_num) }}
+  {%- endif -%}
+{% endmacro %}
+{% if pagination and pagination.pages > 1 %}
+<nav aria-label="التنقل بين الصفحات" class="mt-4">
+  <ul class="pagination justify-content-center" style="gap:4px;">
+    {% if pagination.has_prev %}
+    <li class="page-item">
+      <a class="page-link" href="{{ page_url(pagination.prev_num) }}" style="border-radius:8px;padding:6px 14px;">
+        <i class="fas fa-chevron-right"></i>
+      </a>
+    </li>
+    {% else %}
+    <li class="page-item disabled">
+      <span class="page-link" style="border-radius:8px;padding:6px 14px;"><i class="fas fa-chevron-right"></i></span>
+    </li>
+    {% endif %}
+
+    {% for p in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+      {% if p %}
+        <li class="page-item {% if p == pagination.page %}active{% endif %}">
+          <a class="page-link" href="{{ page_url(p) }}" style="border-radius:8px;padding:6px 14px;{% if p == pagination.page %}background:var(--primary);border-color:var(--primary);color:white;{% endif %}">{{ p }}</a>
+        </li>
+      {% else %}
+        <li class="page-item disabled"><span class="page-link" style="border-radius:8px;padding:6px 14px;">...</span></li>
+      {% endif %}
+    {% endfor %}
+
+    {% if pagination.has_next %}
+    <li class="page-item">
+      <a class="page-link" href="{{ page_url(pagination.next_num) }}" style="border-radius:8px;padding:6px 14px;">
+        <i class="fas fa-chevron-left"></i>
+      </a>
+    </li>
+    {% else %}
+    <li class="page-item disabled">
+      <span class="page-link" style="border-radius:8px;padding:6px 14px;"><i class="fas fa-chevron-left"></i></span>
+    </li>
+    {% endif %}
+  </ul>
+  <div class="text-center text-muted" style="font-size:12px;">
+    الصفحة {{ pagination.page }} من {{ pagination.pages }} ({{ pagination.total }} إجمالاً)
+  </div>
+</nav>
+{% endif %}

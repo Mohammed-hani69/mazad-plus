@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>الإشعارات - Mazad Plus</title>
+  <link rel="icon" href="{{ url_for('static', filename='favicon.png') }}">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    :root {
+      --notif-primary: #4f46e5;
+      --notif-secondary: #7c3aed;
+      --notif-accent: #a855f7;
+      --notif-gradient: linear-gradient(135deg, #1e1b4b 0%, #312e81 40%, #4f46e5 100%);
+      --notif-glow: 0 12px 40px rgba(79, 70, 229, 0.25);
+      --card-radius: 16px;
+    }
+
+    /* ─── Toast Alert ─── */
+    .alert-toast {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 9999;
+      min-width: 320px;
+      max-width: 500px;
+      padding: 16px 20px;
+      border-radius: 14px;
+      border: none;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 14px;
+      font-weight: 500;
+      animation: slideDown 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      direction: rtl;
+    }
+    .alert-toast.alert-success { background: linear-gradient(135deg, #ecfdf5, #d1fae5); color: #065f46; border-right: 4px solid #10b981; }
+    .alert-toast.alert-danger { background: linear-gradient(135deg, #fef2f2, #fee2e2); color: #991b1b; border-right: 4px solid #ef4444; }
+    .alert-toast.alert-warning { background: linear-gradient(135deg, #fffbeb, #fef3c7); color: #92400e; border-right: 4px solid #f59e0b; }
+    .alert-toast.alert-info { background: linear-gradient(135deg, #eef2ff, #e0e7ff); color: #3730a3; border-right: 4px solid #4f46e5; }
+    .alert-toast .toast-icon { font-size: 20px; flex-shrink: 0; }
+    .alert-toast .toast-msg { flex: 1; }
+    .alert-toast .toast-close {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      border: none;
+      background: rgba(0,0,0,0.06);
+      color: inherit;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+    .alert-toast .toast-close:hover { background: rgba(0,0,0,0.12); }
+    .alert-toast .toast-progress {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      height: 3px;
+      background: currentColor;
+      opacity: 0.3;
+      border-radius: 0 0 14px 14px;
+      animation: toastProgress 5s linear forwards;
+    }
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateX(-50%) translateY(-20px) scale(0.96); }
+      to { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+    }
+    @keyframes toastProgress {
+      from { width: 100%; }
+      to { width: 0%; }
+    }
+
+    /* ─── Hero ─── */
+    .notif-hero {
+      background: var(--notif-gradient);
+      border-radius: 24px;
+      padding: 36px 40px 32px;
+      margin-bottom: 30px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--notif-glow);
+      isolation: isolate;
+    }
+    .notif-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 600px 400px at 80% 20%, rgba(124,58,237,0.35) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .notif-hero::after {
+      content: '';
+      position: absolute;
+      width: 500px;
+      height: 500px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(168,85,247,0.15) 0%, transparent 70%);
+      top: -200px;
+      left: -200px;
+      pointer-events: none;
+    }
+    .notif-hero-content { position: relative; z-index: 1; }
+
+    .notif-hero-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .notif-hero-title-group {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .notif-hero-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.15);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      color: white;
+      flex-shrink: 0;
+    }
+    .notif-hero-text h1 {
+      color: white;
+      font-weight: 800;
+      font-size: 24px;
+      margin: 0;
+      line-height: 1.3;
+      letter-spacing: -0.3px;
+    }
+    .notif-hero-text p {
+      color: rgba(255,255,255,0.7);
+      font-size: 14px;
+      margin: 2px 0 0;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255,255,255,0.12);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 100px;
+      padding: 6px 16px;
+      color: white;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .hero-badge i { font-size: 12px; opacity: 0.8; }
+
+    .hero-stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+    .hero-stat-card {
+      background: rgba(255,255,255,0.08);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 14px;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      transition: all 0.3s;
+    }
+    .hero-stat-card:hover {
+      background: rgba(255,255,255,0.14);
+      transform: translateY(-2px);
+      border-color: rgba(255,255,255,0.2);
+    }
+    .hero-stat-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      color: white;
+      flex-shrink: 0;
+    }
+    .hero-stat-info { color: white; }
+    .hero-stat-number { font-size: 24px; font-weight: 800; line-height: 1; letter-spacing: -0.5px; }
+    .hero-stat-label { font-size: 12px; opacity: 0.65; margin-top: 2px; }
+
+    /* ─── Content Cards ─── */
+    .content-card {
+      background: white;
+      border-radius: var(--card-radius);
+      border: 1px solid #e5e7eb;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.04);
+      margin-bottom: 24px;
+      overflow: hidden;
+      transition: box-shadow 0.3s;
+    }
+    .content-card:hover { box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 8px 32px rgba(0,0,0,0.06); }
+    .content-card-header {
+      padding: 18px 24px;
+      border-bottom: 1px solid #f1f2f4;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .content-card-header h5 {
+      margin: 0;
+      font-weight: 700;
+      font-size: 15px;
+      color: #1f2937;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .content-card-header h5 i { color: var(--notif-primary); }
+    .content-card-body { padding: 0; }
+
+    /* ─── Form ─── */
+    .form-body { padding: 24px; }
+    .form-group { margin-bottom: 20px; }
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      font-size: 13px;
+      color: #374151;
+      margin-bottom: 6px;
+    }
+    .form-group label .label-icon { color: var(--notif-primary); margin-left: 6px; }
+    .form-control-nice {
+      width: 100%;
+      padding: 11px 16px;
+      border: 2px solid #e5e7eb;
+      border-radius: 10px;
+      font-size: 14px;
+      transition: all 0.2s;
+      background: #fafbfc;
+      color: #1f2937;
+    }
+    .form-control-nice:focus {
+      border-color: var(--notif-primary);
+      box-shadow: 0 0 0 4px rgba(79,70,229,0.08);
+      background: white;
+      outline: none;
+    }
+    .form-control-nice::placeholder { color: #9ca3af; }
+    textarea.form-control-nice { min-height: 100px; resize: vertical; }
+    select.form-control-nice {
+      cursor: pointer;
+      -webkit-appearance: none;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: left 14px center;
+      padding-left: 36px;
+    }
+
+    .btn-primary-gradient {
+      background: linear-gradient(135deg, var(--notif-primary) 0%, var(--notif-secondary) 100%);
+      color: white;
+      padding: 12px 28px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 15px;
+      border: none;
+      transition: all 0.3s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+    .btn-primary-gradient::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%);
+      pointer-events: none;
+    }
+    .btn-primary-gradient:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(79,70,229,0.3);
+    }
+    .btn-primary-gradient:active { transform: translateY(0); }
+
+    /* ─── Timeline ─── */
+    .timeline-list { max-height: 580px; overflow-y: auto; }
+    .timeline-list::-webkit-scrollbar { width: 4px; }
+    .timeline-list::-webkit-scrollbar-track { background: transparent; }
+    .timeline-list::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 2px; }
+    .timeline-list::-webkit-scrollbar-thumb:hover { background: #d1d5db; }
+
+    .tl-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 16px 24px;
+      border-bottom: 1px solid #f3f4f6;
+      transition: all 0.2s;
+    }
+    .tl-item:last-child { border-bottom: none; }
+    .tl-item:hover { background: #f9fafb; }
+
+    .tl-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 17px;
+      flex-shrink: 0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    .tl-icon.info { background: #eef2ff; color: #4f46e5; }
+    .tl-icon.warning { background: #fffbeb; color: #f59e0b; }
+    .tl-icon.success { background: #ecfdf5; color: #10b981; }
+    .tl-icon.danger { background: #fef2f2; color: #ef4444; }
+
+    .tl-body { flex: 1; min-width: 0; }
+    .tl-title { font-weight: 700; font-size: 14px; color: #1f2937; margin-bottom: 1px; }
+    .tl-msg { font-size: 13px; color: #6b7280; display: block; margin-bottom: 4px; }
+    .tl-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      font-size: 12px;
+    }
+    .tl-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: #f3f4f6;
+      color: #374151;
+      padding: 2px 10px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 11px;
+    }
+    .tl-tag i { font-size: 10px; }
+    .tl-tag.recipient { background: #eef2ff; color: #4f46e5; }
+    .tl-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      padding: 2px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .tl-badge.info { background: #eef2ff; color: #4f46e5; }
+    .tl-badge.warning { background: #fffbeb; color: #f59e0b; }
+    .tl-badge.success { background: #ecfdf5; color: #10b981; }
+    .tl-badge.danger { background: #fef2f2; color: #ef4444; }
+    .tl-link {
+      color: #4f46e5;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+    }
+    .tl-link:hover { text-decoration: underline; }
+    .tl-time {
+      color: #9ca3af;
+      font-size: 11px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* ─── Empty State ─── */
+    .empty-state {
+      text-align: center;
+      padding: 60px 24px;
+    }
+    .empty-state .empty-icon {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: #f3f4f6;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+      font-size: 28px;
+      color: #d1d5db;
+    }
+    .empty-state strong { display: block; color: #6b7280; font-size: 15px; }
+    .empty-state small { color: #9ca3af; font-size: 13px; }
+
+    /* ─── Search ─── */
+    .search-box-nice {
+      position: relative;
+      width: 200px;
+    }
+    .search-box-nice input {
+      width: 100%;
+      padding: 7px 12px 7px 32px;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 13px;
+      background: #f9fafb;
+      transition: all 0.2s;
+    }
+    .search-box-nice input:focus {
+      border-color: var(--notif-primary);
+      box-shadow: 0 0 0 3px rgba(79,70,229,0.08);
+      background: white;
+      outline: none;
+    }
+    .search-box-nice i {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #9ca3af;
+      font-size: 12px;
+      pointer-events: none;
+    }
+
+    /* ─── Responsive ─── */
+    @media (max-width: 991px) {
+      .hero-stats-row { grid-template-columns: repeat(3, 1fr); }
+    }
+    @media (max-width: 767px) {
+      .notif-hero { padding: 24px 18px; border-radius: 18px; }
+      .notif-hero-title-group { gap: 12px; }
+      .notif-hero-icon { width: 44px; height: 44px; font-size: 18px; border-radius: 12px; }
+      .notif-hero-text h1 { font-size: 18px; }
+      .hero-stats-row { grid-template-columns: 1fr; }
+      .hero-stat-card { padding: 12px 16px; }
+      .hero-stat-number { font-size: 20px; }
+      .search-box-nice { width: 140px; }
+      .content-card-header { padding: 14px 16px; flex-wrap: wrap; }
+      .tl-item { padding: 12px 16px; }
+      .tl-icon { width: 38px; height: 38px; font-size: 14px; }
+      .form-body { padding: 16px; }
+      .alert-toast { min-width: auto; width: calc(100% - 32px); max-width: none; top: 12px; }
+    }
+  </style>
+</head>
+<body>
+  {% include 'navbar.html' %}
+  {% include 'sidebar.html' %}
+
+  <!-- Flash Toasts -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+    <div class="alert-toast alert-{{ category }}" id="toast-{{ loop.index }}">
+      <i class="toast-icon fas fa-{{ 'check-circle' if category == 'success' else 'times-circle' if category == 'danger' else 'exclamation-circle' if category == 'warning' else 'info-circle' }}"></i>
+      <span class="toast-msg">{{ message }}</span>
+      <button class="toast-close" onclick="this.closest('.alert-toast').remove()">&times;</button>
+      <div class="toast-progress"></div>
+    </div>
+    {% endfor %}
+  {% endif %}
+  {% endwith %}
+
+  <div class="main-content">
+    <!-- Hero -->
+    <div class="notif-hero">
+      <div class="notif-hero-content">
+        <div class="notif-hero-header">
+          <div class="notif-hero-title-group">
+            <div class="notif-hero-icon"><i class="fas fa-bell"></i></div>
+            <div class="notif-hero-text">
+              <h1>مركز الإشعارات</h1>
+              <p>إدارة وإرسال الإشعارات لجميع مستخدمي النظام</p>
+            </div>
+          </div>
+          <div class="hero-badge"><i class="fas fa-shield-alt"></i> لوحة تحكم المشرف</div>
+        </div>
+        <div class="hero-stats-row">
+          <div class="hero-stat-card">
+            <div class="hero-stat-icon"><i class="fas fa-paper-plane"></i></div>
+            <div class="hero-stat-info">
+              <div class="hero-stat-number">{{ sent|length }}</div>
+              <div class="hero-stat-label">إجمالي الإشعارات</div>
+            </div>
+          </div>
+          <div class="hero-stat-card">
+            <div class="hero-stat-icon"><i class="fas fa-users"></i></div>
+            <div class="hero-stat-info">
+              <div class="hero-stat-number">{{ users|length }}</div>
+              <div class="hero-stat-label">المستخدمين النشطين</div>
+            </div>
+          </div>
+          <div class="hero-stat-card">
+            <div class="hero-stat-icon"><i class="fas fa-globe"></i></div>
+            <div class="hero-stat-info">
+              <div class="hero-stat-number">{{ sent|selectattr('recipient_id','none')|list|length }}</div>
+              <div class="hero-stat-label">إشعارات عامة</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-4">
+      <!-- Send Form -->
+      <div class="col-lg-5">
+        <div class="content-card">
+          <div class="content-card-header">
+            <h5><i class="fas fa-paper-plane"></i>إرسال إشعار جديد</h5>
+            <span style="font-size:12px;color:#9ca3af;font-weight:500;">* إجبارية</span>
+          </div>
+          <div class="content-card-body">
+            <div class="form-body">
+              <form method="POST" action="{{ url_for('admin_send_notification') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="form-group">
+                  <label><i class="fas fa-user label-icon"></i>المستلم</label>
+                  <select name="recipient_id" class="form-control-nice" required>
+                    <option value="all">📢 جميع المستخدمين</option>
+                    {% for u in users %}
+                    <option value="{{ u.id }}">{{ u.full_name }} — {{ u.email }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label><i class="fas fa-tag label-icon"></i>النوع</label>
+                  <select name="type" class="form-control-nice" id="notifTypeSelect">
+                    <option value="info">ℹ️ معلومات</option>
+                    <option value="success">✅ نجاح</option>
+                    <option value="warning">⚠️ تحذير</option>
+                    <option value="danger">❌ خطأ</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label><i class="fas fa-heading label-icon"></i>العنوان <span class="text-danger">*</span></label>
+                  <input type="text" name="title" class="form-control-nice" required maxlength="200" placeholder="أدخل عنوان الإشعار...">
+                </div>
+                <div class="form-group">
+                  <label><i class="fas fa-align-left label-icon"></i>الرسالة</label>
+                  <textarea name="message" class="form-control-nice" placeholder="نص الإشعار (اختياري)"></textarea>
+                </div>
+                <div class="form-group">
+                  <label><i class="fas fa-link label-icon"></i>رابط (اختياري)</label>
+                  <input type="url" name="link" class="form-control-nice" placeholder="https://example.com" dir="ltr">
+                </div>
+                <button type="submit" class="btn-primary-gradient w-100">
+                  <i class="fas fa-paper-plane"></i>
+                  إرسال الإشعار
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sent Notifications -->
+      <div class="col-lg-7">
+        <div class="content-card">
+          <div class="content-card-header">
+            <h5><i class="fas fa-history"></i>سجل الإشعارات</h5>
+            <div class="search-box-nice">
+              <input type="text" id="notifSearchInput" placeholder="بحث...">
+              <i class="fas fa-search"></i>
+            </div>
+          </div>
+          <div class="content-card-body">
+            <div class="timeline-list" id="sentNotifList">
+              {% if sent %}
+              {% for n in sent %}
+              <div class="tl-item notif-entry" data-search="{{ n.title }} {{ n.message or '' }} {{ n.recipient.full_name if n.recipient else 'الكل' }}">
+                <div class="tl-icon {{ n.type }}">
+                  <i class="fas fa-{{ 'info-circle' if n.type == 'info' else 'exclamation-triangle' if n.type == 'warning' else 'check-circle' if n.type == 'success' else 'times-circle' }}"></i>
+                </div>
+                <div class="tl-body">
+                  <div class="tl-title">{{ n.title }}</div>
+                  {% if n.message %}<span class="tl-msg">{{ n.message }}</span>{% endif %}
+                  <div class="tl-meta">
+                    <span class="tl-tag recipient"><i class="fas fa-user"></i>{{ n.recipient.full_name if n.recipient else 'جميع المستخدمين' }}</span>
+                    <span class="tl-badge {{ n.type }}">
+                      <i class="fas fa-{{ 'info-circle' if n.type == 'info' else 'exclamation-circle' if n.type == 'warning' else 'check-circle' if n.type == 'success' else 'times-circle' }}"></i>
+                      {{ {'info':'معلومات','success':'نجاح','warning':'تحذير','danger':'خطأ'}.get(n.type, n.type) }}
+                    </span>
+                    {% if n.link %}
+                    <a href="{{ n.link }}" target="_blank" class="tl-link"><i class="fas fa-external-link-alt"></i>رابط</a>
+                    {% endif %}
+                    <span class="tl-time"><i class="far fa-clock"></i>{{ n.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                  </div>
+                </div>
+              </div>
+              {% endfor %}
+              {% else %}
+              <div class="empty-state">
+                <div class="empty-icon"><i class="far fa-bell-slash"></i></div>
+                <strong>لا توجد إشعارات مرسلة بعد</strong>
+                <small>قم بإرسال أول إشعار من النموذج المجاور</small>
+              </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% include 'footer.html' %}
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // ── Auto-dismiss toasts after 5 seconds ──
+      document.querySelectorAll('.alert-toast').forEach(function(toast) {
+        setTimeout(function() {
+          if (toast.parentNode) {
+            toast.style.transition = 'opacity 0.3s, transform 0.3s';
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateX(-50%) translateY(-10px) scale(0.96)';
+            setTimeout(function() { if (toast.parentNode) toast.remove(); }, 300);
+          }
+        }, 5000);
+      });
+
+      // ── Search in sent notifications ──
+      var searchInput = document.getElementById('notifSearchInput');
+      if (searchInput) {
+        searchInput.addEventListener('input', function() {
+          var q = this.value.trim().toLowerCase();
+          document.querySelectorAll('.notif-entry').forEach(function(el) {
+            var text = (el.dataset.search || '').toLowerCase();
+            el.style.display = (!q || text.includes(q)) ? '' : 'none';
+          });
+        });
+      }
+
+      // ── Type select border color ──
+      var typeSelect = document.getElementById('notifTypeSelect');
+      if (typeSelect) {
+        var colorMap = { info: '#4f46e5', success: '#10b981', warning: '#f59e0b', danger: '#ef4444' };
+        typeSelect.addEventListener('change', function() {
+          this.style.borderColor = colorMap[this.value] || '#e5e7eb';
+        });
+      }
+    });
+  </script>
+</body>
+</html>

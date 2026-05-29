@@ -1,0 +1,154 @@
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-logo">
+      <img src="{{ url_for('static', filename='assets/images/logo.png') }}" alt="Mazad Plus" class="sidebar-logo-img">
+    </div>
+    <button class="sidebar-close d-xl-none" id="sidebarClose">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
+
+ 
+
+  <nav class="sidebar-nav">
+    {% if current_user.is_super_admin %}
+    <!-- ===== SUPER ADMIN SIDEBAR ===== -->
+    <div class="nav-section">
+      <span class="nav-section-title">الإدارة</span>
+      <ul class="nav-list">
+        {% set admin_endpoints = ['admin_dashboard','admin_users','admin_plans','admin_subscriptions','admin_toggle_user','admin_delete_user','admin_subscribe_user','admin_add_plan','admin_edit_plan','admin_toggle_plan','admin_toggle_subscription'] %}
+        <li class="nav-item"><a href="{{ url_for('admin_dashboard') }}" class="nav-link {{ 'active' if request.endpoint in admin_endpoints else '' }}"><span class="nav-icon"><i class="fas fa-crown"></i></span><span class="nav-text">لوحة الإدارة</span></a></li>
+        <li class="nav-item"><a href="{{ url_for('admin_users') }}" class="nav-link {{ 'active' if request.endpoint in admin_endpoints else '' }}"><span class="nav-icon"><i class="fas fa-users-cog"></i></span><span class="nav-text">إدارة المستخدمين</span></a></li>
+        <li class="nav-item"><a href="{{ url_for('admin_plans') }}" class="nav-link {{ 'active' if request.endpoint == 'admin_plans' else '' }}"><span class="nav-icon"><i class="fas fa-boxes"></i></span><span class="nav-text">خطط الاشتراك</span></a></li>
+        <li class="nav-item"><a href="{{ url_for('admin_subscriptions') }}" class="nav-link {{ 'active' if request.endpoint == 'admin_subscriptions' else '' }}"><span class="nav-icon"><i class="fas fa-calendar-check"></i></span><span class="nav-text">الاشتراكات</span></a></li>
+        <li class="nav-item"><a href="{{ url_for('admin_notifications') }}" class="nav-link {{ 'active' if request.endpoint == 'admin_notifications' else '' }}"><span class="nav-icon"><i class="fas fa-bell"></i></span><span class="nav-text">الإشعارات</span></a></li>
+      </ul>
+    </div>
+    <div class="nav-section">
+      <span class="nav-section-title">الدعم</span>
+      <ul class="nav-list">
+        <li class="nav-item"><a href="{{ url_for('user_guide') }}" class="nav-link {{ 'active' if request.endpoint == 'user_guide' else '' }}"><span class="nav-icon"><i class="fas fa-book-open"></i></span><span class="nav-text">دليل الاستخدام</span></a></li>
+        <li class="nav-item"><a href="{{ url_for('support') }}" class="nav-link"><span class="nav-icon"><i class="fas fa-headset"></i></span><span class="nav-text">الدعم الفني</span></a></li>
+      </ul>
+    </div>
+    {% else %}
+    <!-- ===== REGULAR USER SIDEBAR ===== -->
+    {% set is_employee = current_user.role == 'employee' %}
+    {% macro check_perm(endpoint) %}
+      {%- if not is_employee or employee_permissions.get(endpoint) -%}true{%- else -%}false{%- endif -%}
+    {% endmacro %}
+    <div class="sidebar-search">
+      <div class="search-input-group">
+        <i class="fas fa-search"></i>
+        <input type="text" class="form-control" id="sidebarSearchInput" placeholder="بحث في القائمة...">
+      </div>
+    </div>
+    <div class="nav-section">
+      <span class="nav-section-title">الرئيسية</span>
+      <ul class="nav-list">
+        {% set dashboard_endpoints = ['dashboard'] %}
+        {% if check_perm('dashboard') == 'true' %}
+        <li class="nav-item"><a href="{{ url_for('dashboard') }}" class="nav-link {{ 'active' if request.endpoint in dashboard_endpoints else '' }}"><span class="nav-icon"><i class="fas fa-home"></i></span><span class="nav-text">لوحة التحكم</span></a></li>
+        {% endif %}
+      </ul>
+    </div>
+    <div class="nav-section">
+      <span class="nav-section-title">الأساسيات</span>
+      <ul class="nav-list">
+        {% set branches_endpoints = ['branches_list','branch_add','branch_edit','branch_delete'] %}
+        {% if check_perm('branches') == 'true' %}
+        <li class="nav-item"><a href="{{ url_for('branches_list') }}" class="nav-link {{ 'active' if request.endpoint in branches_endpoints else '' }}"><span class="nav-icon"><i class="fas fa-code-branch"></i></span><span class="nav-text">الفروع</span></a></li>
+        {% endif %}
+        {% set stores_endpoints = ['stores_list','store_add','store_edit','store_delete'] %}
+        {% if check_perm('stores') == 'true' %}
+        <li class="nav-item"><a href="{{ url_for('stores_list') }}" class="nav-link {{ 'active' if request.endpoint in stores_endpoints else '' }}"><span class="nav-icon"><i class="fas fa-warehouse"></i></span><span class="nav-text">المخازن</span></a></li>
+        {% endif %}
+        {% set categories_endpoints = ['categories_list','category_add','category_edit','category_delete'] %}
+        {% if check_perm('categories') == 'true' %}
+        <li class="nav-item"><a href="{{ url_for('categories_list') }}" class="nav-link {{ 'active' if request.endpoint in categories_endpoints else '' }}"><span class="nav-icon"><i class="fas fa-tags"></i></span><span class="nav-text">التصنيفات</span></a></li>
+        {% endif %}
+        {% set items_endpoints = ['items_list','item_add','item_edit','item_delete'] %}
+        {% if check_perm('items') == 'true' %}
+        <li class="nav-item"><a href="{{ url_for('items_list') }}" class="nav-link {{ 'active' if request.endpoint in items_endpoints else '' }}"><span class="nav-icon"><i class="fas fa-cubes"></i></span><span class="nav-text">الأصناف</span></a></li>
+        {% endif %}
+      </ul>
+    </div>
+    <div class="nav-section">
+      <span class="nav-section-title">الأطراف</span>
+      <ul class="nav-list">
+        {% set customers_endpoints = ['customers_list','customer_add','customer_edit','customer_delete'] %}
+        {% if check_perm('customers') == 'true' %}
+        <li class="nav-item"><a href="{{ url_for('customers_list') }}" class="nav-link {{ 'active' if request.endpoint in customers_endpoints else '' }}"><span class="nav-icon"><i class="fas fa-user-friends"></i></span><span class="nav-text">العملاء</span></a></li>
+        {% endif %}
+        {% set suppliers_endpoints = ['suppliers_list','supplier_add','supplier_edit','supplier_delete'] %}
+        {% if check_perm('suppliers') == 'true' %}
+        <li class="nav-item"><a href="{{ url_for('suppliers_list') }}" class="nav-link {{ 'active' if request.endpoint in suppliers_endpoints else '' }}"><span class="nav-icon"><i class="fas fa-truck"></i></span><span class="nav-text">الموردين</span></a></li>
+        {% endif %}
+      </ul>
+    </div>
+    <div class="nav-section">
+      <span class="nav-section-title">المعاملات اليومية</span>
+      <ul class="nav-list">
+        {% set purchases_endpoints = ['purchases_list','purchase_add','purchase_view','purchase_edit','purchase_delete'] %}
+        {% if check_perm('purchases') == 'true' or check_perm('purchase_add') == 'true' %}
+        <li class="nav-item"><a href="{{ url_for('purchases_list') }}" class="nav-link {{ 'active' if request.endpoint in purchases_endpoints else '' }}"><span class="nav-icon"><i class="fas fa-shopping-cart"></i></span><span class="nav-text">المشتريات</span></a></li>
+        {% endif %}
+        {% set sales_endpoints = ['sales_list','sale_add','sale_view','sale_edit','sale_delete'] %}
+        {% if check_perm('sales') == 'true' or check_perm('sale_add') == 'true' %}
+        <li class="nav-item"><a href="{{ url_for('sales_list') }}" class="nav-link {{ 'active' if request.endpoint in sales_endpoints else '' }}"><span class="nav-icon"><i class="fas fa-chart-line"></i></span><span class="nav-text">المبيعات</span></a></li>
+        {% endif %}
+        {% set returns_endpoints = ['returns_list','return_add','return_view','return_edit','return_delete'] %}
+        {% if check_perm('returns') == 'true' or check_perm('return_add') == 'true' %}
+        <li class="nav-item"><a href="{{ url_for('returns_list') }}" class="nav-link {{ 'active' if request.endpoint in returns_endpoints else '' }}"><span class="nav-icon"><i class="fas fa-undo-alt"></i></span><span class="nav-text">المرتجعات</span></a></li>
+        {% endif %}
+      </ul>
+    </div>
+    <div class="nav-section">
+      <span class="nav-section-title">الإدارة المالية</span>
+      <ul class="nav-list">
+        {% set expenses_endpoints = ['expenses_list','expense_add','expense_edit','expense_delete'] %}
+        {% if check_perm('expenses') == 'true' %}
+        <li class="nav-item"><a href="{{ url_for('expenses_list') }}" class="nav-link {{ 'active' if request.endpoint in expenses_endpoints else '' }}"><span class="nav-icon"><i class="fas fa-coins"></i></span><span class="nav-text">المصروفات</span></a></li>
+        {% endif %}
+        {% set bonds_endpoints = ['bonds_list','bond_add','bond_edit','bond_delete'] %}
+        {% if check_perm('bonds') == 'true' %}
+        <li class="nav-item"><a href="{{ url_for('bonds_list') }}" class="nav-link {{ 'active' if request.endpoint in bonds_endpoints else '' }}"><span class="nav-icon"><i class="fas fa-file-invoice-dollar"></i></span><span class="nav-text">السندات</span></a></li>
+        {% endif %}
+        {% set invoice_endpoints = ['invoice_settings'] %}
+        {% if check_perm('invoice_settings') == 'true' %}
+        <li class="nav-item"><a href="{{ url_for('invoice_settings') }}" class="nav-link {{ 'active' if request.endpoint in invoice_endpoints else '' }}"><span class="nav-icon"><i class="fas fa-print"></i></span><span class="nav-text">قوالب الفواتير</span></a></li>
+        {% endif %}
+        <li class="nav-item"><a href="{{ url_for('settings') }}" class="nav-link {{ 'active' if request.endpoint == 'settings' else '' }}"><span class="nav-icon"><i class="fas fa-cog"></i></span><span class="nav-text">الإعدادات</span></a></li>
+      </ul>
+    </div>
+    {% if not is_employee %}
+    <div class="nav-section">
+      <span class="nav-section-title">الإدارة</span>
+      <ul class="nav-list">
+        {% set employees_endpoints = ['employees','employee_add','employee_edit','employee_delete','employee_toggle'] %}
+        <li class="nav-item"><a href="{{ url_for('employees') }}" class="nav-link {{ 'active' if request.endpoint in employees_endpoints else '' }}"><span class="nav-icon"><i class="fas fa-users-cog"></i></span><span class="nav-text">الموظفين</span></a></li>
+      </ul>
+    </div>
+    {% endif %}
+    <div class="nav-section">
+      <span class="nav-section-title">الدعم</span>
+      <ul class="nav-list">
+        {% if check_perm('user_guide') == 'true' %}
+        <li class="nav-item"><a href="{{ url_for('user_guide') }}" class="nav-link {{ 'active' if request.endpoint == 'user_guide' else '' }}"><span class="nav-icon"><i class="fas fa-book-open"></i></span><span class="nav-text">دليل الاستخدام</span></a></li>
+        {% endif %}
+        <li class="nav-item"><a href="{{ url_for('support') }}" class="nav-link"><span class="nav-icon"><i class="fas fa-headset"></i></span><span class="nav-text">الدعم الفني</span></a></li>
+      </ul>
+    </div>
+    {% endif %}
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="sidebar-footer-info">
+      <div class="footer-icon"><i class="fas fa-shield-alt"></i></div>
+      <div class="footer-text">
+        <span>النظام محمي</span>
+        <small>جميع الحقوق محفوظة</small>
+      </div>
+    </div>
+  </div>
+</aside>

@@ -1,0 +1,93 @@
+<meta name="csrf-token" content="{{ csrf_token() }}">
+<script>
+var currentUserIsSuperAdmin = {{ 'true' if current_user.is_super_admin else 'false' }};
+var currentUserDarkMode = {{ 'true' if current_user.is_authenticated and current_user.user_settings and current_user.user_settings.dark_mode else 'false' }};
+// Apply dark mode from user settings on page load
+if (currentUserDarkMode) {
+  document.documentElement.setAttribute('data-theme', 'dark');
+  localStorage.setItem('theme', 'dark');
+} else if (localStorage.getItem('theme') === 'dark') {
+  document.documentElement.setAttribute('data-theme', 'dark');
+}
+// Auto-inject CSRF token into all forms
+document.addEventListener('DOMContentLoaded', function() {
+    var token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+    if (token) {
+        document.querySelectorAll('form').forEach(function(form) {
+            if (!form.querySelector('input[name="csrf_token"]')) {
+                var input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'csrf_token';
+                input.value = token;
+                form.appendChild(input);
+            }
+        });
+    }
+});
+</script>
+<header class="top-navbar">
+  <div class="navbar-left">
+    <button class="navbar-toggler" id="sidebarToggle">
+      <i class="fas fa-bars"></i>
+    </button>
+    <div class="navbar-search d-none d-md-block">
+      <div class="search-box">
+        <i class="fas fa-search"></i>
+        <input type="text" class="form-control" placeholder="بحث سريع...">
+      </div>
+    </div>
+  </div>
+
+  <div class="navbar-right">
+    <div class="navbar-notifications">
+      <button class="notif-btn" id="darkModeToggle" title="الوضع الليلي">
+        <i class="fas fa-moon"></i>
+      </button>
+    </div>
+    <div class="navbar-notifications">
+      <a href="{{ url_for('backup_database') }}" class="notif-btn" title="تصدير قاعدة البيانات">
+        <i class="fas fa-database"></i>
+      </a>
+    </div>
+    <div class="navbar-notifications">
+      <div class="dropdown" id="notificationDropdown">
+        <button class="notif-btn" id="notifBtn" data-bs-toggle="dropdown" aria-expanded="false">
+          <i class="fas fa-bell"></i>
+          <span class="notif-badge" id="notifBadge" style="display:none">0</span>
+        </button>
+        <div class="dropdown-menu dropdown-menu-end notif-dropdown" aria-labelledby="notifBtn">
+          <div class="notif-header">
+            <span class="notif-header-title">الإشعارات</span>
+            <button class="btn btn-sm btn-link notif-mark-all" id="notifMarkAll">تحديد الكل كمقروء</button>
+          </div>
+          <div class="notif-list" id="notifList">
+            <div class="notif-loading text-center py-3">
+              <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+              <small class="d-block mt-1 text-muted">جاري التحميل...</small>
+            </div>
+          </div>
+          <div class="notif-footer text-center">
+            <a href="#" class="btn btn-sm btn-link notif-view-all" id="notifViewAll">عرض الكل</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="navbar-divider"></div>
+    <div class="navbar-profile dropdown">
+      <div class="profile-info" data-bs-toggle="dropdown" aria-expanded="false">
+        <span class="profile-name">{{ current_user.full_name }}</span>
+        <small class="profile-role">{{ 'مدير النظام' if current_user.role == 'admin' else 'مستخدم' }}</small>
+      </div>
+      <div class="profile-avatar" data-bs-toggle="dropdown" aria-expanded="false">
+        <img src="https://ui-avatars.com/api/?name={{ current_user.full_name }}&background=4f46e5&color=fff&size=40" alt="Profile">
+      </div>
+      <ul class="dropdown-menu dropdown-menu-end">
+        <li><a class="dropdown-item" href="#"><i class="fas fa-user-cog"></i> الملف الشخصي</a></li>
+        <li><a class="dropdown-item" href="{{ url_for('activity_logs') }}"><i class="fas fa-history"></i> سجل النشاطات</a></li>
+        <li><a class="dropdown-item" href="{{ url_for('settings') }}"><i class="fas fa-cog"></i> الإعدادات</a></li>
+        <li><hr class="dropdown-divider"></li>
+        <li><a class="dropdown-item text-danger" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> تسجيل الخروج</a></li>
+      </ul>
+    </div>
+  </div>
+</header>

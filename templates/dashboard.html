@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mazad Plus - لوحة التحكم</title>
+  <link rel="icon" href="{{ url_for('static', filename='favicon.png') }}">
+
+  <!-- Bootstrap 5 RTL -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css">
+  <!-- Font Awesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <!-- Google Font - Cairo -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    .dashboard-cards { margin-bottom: 24px; }
+    .stat-card { margin-bottom: 0; }
+    .stat-link { text-decoration: none; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
+
+    .top-items-panel { background: white; border-radius: 12px; border: 1px solid var(--border-color); box-shadow: var(--shadow-card); }
+    .top-items-header { padding: 16px 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
+    .top-items-header h4 { font-size: 15px; font-weight: 700; margin: 0; }
+    .top-items-header small { color: var(--text-muted); font-size: 12px; }
+    .top-items-body { padding: 8px 0; }
+    .top-item-card { display: flex; align-items: center; gap: 12px; padding: 10px 20px; border-bottom: 1px solid var(--border-light); }
+    .top-item-card:last-child { border-bottom: none; }
+    .top-item-rank { width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; color: white; flex-shrink: 0; }
+    .rank-1 { background: linear-gradient(135deg, #f59e0b, #f97316); }
+    .rank-2 { background: linear-gradient(135deg, #6366f1, #4f46e5); }
+    .rank-3 { background: linear-gradient(135deg, #10b981, #059669); }
+    .rank-4 { background: #6b7280; }
+    .rank-5 { background: #9ca3af; }
+    .top-item-details { flex: 1; min-width: 0; }
+    .top-item-name { display: block; font-weight: 700; font-size: 13px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .top-item-count { font-size: 11px; color: var(--text-muted); }
+    .top-item-rev { font-size: 14px; font-weight: 800; color: var(--primary); }
+    .top-item-empty { text-align: center; padding: 40px 20px; color: var(--text-muted); }
+    .top-item-empty i { font-size: 36px; display: block; margin-bottom: 8px; }
+    .top-item-empty p { font-size: 13px; }
+
+    .real-chart { padding: 16px 20px; }
+    .real-chart .bar-wrapper { display: flex; align-items: flex-end; justify-content: space-around; height: 180px; padding-top: 10px; gap: 6px; }
+    .real-chart .bar-group { display: flex; flex-direction: column; align-items: center; flex: 1; }
+    .real-chart .bar-column { display: flex; align-items: flex-end; gap: 3px; height: 160px; }
+    .real-chart .bar { width: 20px; border-radius: 4px 4px 0 0; min-height: 4px; transition: height 0.6s ease; }
+    .real-chart .bar.sales-bar { background: linear-gradient(180deg, #6366f1, #4f46e5); }
+    .real-chart .bar.purchases-bar { background: linear-gradient(180deg, #f59e0b, #d97706); }
+    .real-chart .bar-label { font-size: 10px; color: var(--text-muted); margin-top: 6px; text-align: center; white-space: nowrap; }
+    .real-chart .chart-legend { display: flex; gap: 16px; justify-content: center; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border-light); }
+    .real-chart .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-secondary); }
+    .real-chart .legend-dot { width: 10px; height: 10px; border-radius: 3px; }
+
+    .alerts-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+    .alert-badge { display: flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 10px; font-size: 13px; font-weight: 600; }
+    .alert-badge i { font-size: 16px; }
+    .alert-badge.danger { background: #fef2f2; color: #ef4444; }
+    .alert-badge.warning { background: #fffbeb; color: #d97706; }
+    .alert-badge.success { background: #ecfdf5; color: #10b981; }
+    .badge-status { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    .badge-active { background: #ecfdf5; color: #10b981; }
+    .badge-warning { background: #fffbeb; color: #d97706; }
+    .badge-inactive { background: #fef2f2; color: #ef4444; }
+    .stat-card .stat-number { font-size: 24px; font-weight: 800; }
+    @media (max-width: 767px) { .page-content > div:first-child h2 { font-size: 18px; } }
+    @media (max-width: 575px) { .page-content > div:first-child h2 { font-size: 16px; } }
+  </style>
+</head>
+<body>
+
+  <div class="dashboard-wrapper">
+
+    {% include 'sidebar.html' %}
+
+    <!-- ==================== OVERLAY ==================== -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- ==================== MAIN CONTENT ==================== -->
+    <main class="main-content" id="mainContent">
+
+      {% include 'navbar.html' %}
+
+      <!-- ==================== PAGE CONTENT ==================== -->
+      <div class="page-content">
+
+        <!-- Page Title -->
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:20px;">
+          <h2 style="font-size:22px;font-weight:800;margin:0;">لوحة التحكم</h2>
+          <i class="fas fa-question-circle help-icon" data-bs-toggle="popover" data-bs-content="هذه الصفحة تعرض ملخصاً شاملاً لأداء متجرك: الإحصائيات، المخططات، وآخر المعاملات"></i>
+        </div>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div style="margin-bottom: 16px;">
+              {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert" style="border-radius: 10px;">
+                  {{ message }}
+                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+
+        <!-- ==================== STOCK ALERTS ==================== -->
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+          <h4 style="font-size:16px;font-weight:700;margin:0;"><i class="fas fa-exclamation-triangle" style="color:#f59e0b;margin-left:6px;"></i> تنبيهات المخزون</h4>
+          <i class="fas fa-question-circle help-icon" data-bs-toggle="popover" data-bs-content="إشعارات بالأصناف التي وصلت إلى الحد الأدنى أو نفذت من المخزون"></i>
+        </div>
+        <div class="alerts-row">
+          {% if alerts.out_of_stock > 0 %}
+          <span class="alert-badge danger"><i class="fas fa-exclamation-triangle"></i> {{ alerts.out_of_stock }} أصناف نفذت من المخزون</span>
+          {% endif %}
+          {% if alerts.low_stock > 0 %}
+          <span class="alert-badge warning"><i class="fas fa-exclamation-circle"></i> {{ alerts.low_stock }} أصناف على وشك النفاد</span>
+          {% endif %}
+          {% if alerts.out_of_stock == 0 and alerts.low_stock == 0 %}
+          <span class="alert-badge success"><i class="fas fa-check-circle"></i> جميع الأصناف متوفرة</span>
+          {% endif %}
+        </div>
+
+        <!-- ==================== STATISTICS TABS ==================== -->
+        <div class="stats-tabs-container">
+          <ul class="stats-tabs" id="statsTabs">
+            <li class="stats-tab active" data-tab="overview">
+              <span class="tab-icon"><i class="fas fa-th-large"></i></span>
+              <span class="tab-text">نظرة عامة</span>
+            </li>
+            <li class="stats-tab" data-tab="sales">
+              <span class="tab-icon"><i class="fas fa-chart-bar"></i></span>
+              <span class="tab-text">إحصائيات المبيعات</span>
+            </li>
+            <li class="stats-tab" data-tab="purchases">
+              <span class="tab-icon"><i class="fas fa-shopping-bag"></i></span>
+              <span class="tab-text">إحصائيات المشتريات</span>
+            </li>
+            <li class="stats-tab" data-tab="returns">
+              <span class="tab-icon"><i class="fas fa-exchange-alt"></i></span>
+              <span class="tab-text">إحصائيات المرتجعات</span>
+            </li>
+            <li class="stats-tab" data-tab="profits">
+              <span class="tab-icon"><i class="fas fa-chart-pie"></i></span>
+              <span class="tab-text">إحصائيات الأرباح</span>
+            </li>
+            <li class="stats-tab" data-tab="customers">
+              <span class="tab-icon"><i class="fas fa-users"></i></span>
+              <span class="tab-text">إحصائيات العملاء</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="tab-content-wrapper">
+
+        <!-- ==================== DASHBOARD CARDS ==================== -->
+        <section class="dashboard-cards" id="dashboardCards" data-section="overview sales purchases returns profits customers">
+          <div class="row g-4">
+
+            <!-- Card - العملاء -->
+            <div class="col-xl-3 col-lg-4 col-md-6">
+              <div class="stat-card card-clients">
+                <div class="stat-card-inner">
+                  <div class="stat-card-header">
+                    <div class="stat-icon"><i class="fas fa-user-friends"></i></div>
+                    <div class="stat-trend trend-up"><i class="fas fa-arrow-up"></i><span>نشط</span></div>
+                  </div>
+                  <div class="stat-card-body">
+                    <h3 class="stat-number counter-value">{{ stats.customers_count }}</h3>
+                    <p class="stat-label">العملاء <i class="fas fa-question-circle help-icon" data-bs-toggle="popover" data-bs-content="إجمالي عدد العملاء المسجلين في النظام"></i></p>
+                  </div>
+                  <div class="stat-card-footer">
+                    <a href="{{ url_for('customers_list') }}" class="stat-link">عرض التفاصيل <i class="fas fa-arrow-left"></i></a>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card - المبيعات -->
+            <div class="col-xl-3 col-lg-4 col-md-6">
+              <div class="stat-card card-sales">
+                <div class="stat-card-inner">
+                  <div class="stat-card-header">
+                    <div class="stat-icon"><i class="fas fa-chart-line"></i></div>
+                    <div class="stat-trend trend-up"><i class="fas fa-arrow-up"></i><span>{{ stats.sales_count }} فاتورة</span></div>
+                  </div>
+                  <div class="stat-card-body">
+                    <h3 class="stat-number counter-value">{{ '{:,.0f}'.format(stats.total_sales) }}</h3>
+                    <p class="stat-label">قيمة المبيعات <i class="fas fa-question-circle help-icon" data-bs-toggle="popover" data-bs-content="إجمالي قيمة فواتير المبيعات المسجلة"></i></p>
+                  </div>
+                  <div class="stat-card-footer">
+                    <a href="{{ url_for('sales_list') }}" class="stat-link">عرض التفاصيل <i class="fas fa-arrow-left"></i></a>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card - المشتريات -->
+            <div class="col-xl-3 col-lg-4 col-md-6">
+              <div class="stat-card card-purchases">
+                <div class="stat-card-inner">
+                  <div class="stat-card-header">
+                    <div class="stat-icon"><i class="fas fa-shopping-cart"></i></div>
+                    <div class="stat-trend trend-down"><i class="fas fa-arrow-down"></i><span>{{ stats.purchases_count }} فاتورة</span></div>
+                  </div>
+                  <div class="stat-card-body">
+                    <h3 class="stat-number counter-value">{{ '{:,.0f}'.format(stats.total_purchases) }}</h3>
+                    <p class="stat-label">قيمة المشتريات <i class="fas fa-question-circle help-icon" data-bs-toggle="popover" data-bs-content="إجمالي قيمة فواتير المشتريات المسجلة"></i></p>
+                  </div>
+                  <div class="stat-card-footer">
+                    <a href="{{ url_for('purchases_list') }}" class="stat-link">عرض التفاصيل <i class="fas fa-arrow-left"></i></a>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card - الأرباح -->
+            <div class="col-xl-3 col-lg-4 col-md-6">
+              <div class="stat-card card-branches">
+                <div class="stat-card-inner">
+                  <div class="stat-card-header">
+                    <div class="stat-icon"><i class="fas fa-chart-pie"></i></div>
+                    <div class="stat-trend {% if stats.profit > 0 %}trend-up{% else %}trend-down{% endif %}">
+                      <i class="fas {% if stats.profit > 0 %}fa-arrow-up{% else %}fa-arrow-down{% endif %}"></i>
+                      <span>صافي</span>
+                    </div>
+                  </div>
+                  <div class="stat-card-body">
+                    <h3 class="stat-number counter-value" style="color:{% if stats.profit > 0 %}var(--success){% else %}#ef4444{% endif %};">{{ '{:,.0f}'.format(stats.profit) }}</h3>
+                    <p class="stat-label">صافي الأرباح <i class="fas fa-question-circle help-icon" data-bs-toggle="popover" data-bs-content="صافي الربح = إجمالي المبيعات - إجمالي المشتريات"></i></p>
+                  </div>
+                  <div class="stat-card-footer">
+                    <a href="{{ url_for('dashboard') }}" class="stat-link">عرض التفاصيل <i class="fas fa-arrow-left"></i></a>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card - الأصناف -->
+            <div class="col-xl-3 col-lg-4 col-md-6">
+              <div class="stat-card card-items">
+                <div class="stat-card-inner">
+                  <div class="stat-card-header">
+                    <div class="stat-icon"><i class="fas fa-cubes"></i></div>
+                    <div class="stat-trend trend-up"><i class="fas fa-arrow-up"></i><span>متوفر</span></div>
+                  </div>
+                  <div class="stat-card-body">
+                    <h3 class="stat-number counter-value">{{ stats.items_count }}</h3>
+                    <p class="stat-label">الأصناف <i class="fas fa-question-circle help-icon" data-bs-toggle="popover" data-bs-content="عدد الأصناف المسجلة في المخازن"></i></p>
+                  </div>
+                  <div class="stat-card-footer">
+                    <a href="{{ url_for('items_list') }}" class="stat-link">عرض التفاصيل <i class="fas fa-arrow-left"></i></a>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card - المصروفات -->
+            <div class="col-xl-3 col-lg-4 col-md-6">
+              <div class="stat-card card-exchange">
+                <div class="stat-card-inner">
+                  <div class="stat-card-header">
+                    <div class="stat-icon"><i class="fas fa-coins"></i></div>
+                    <div class="stat-trend trend-down"><i class="fas fa-arrow-down"></i><span>{{ stats.expenses_count }} معاملة</span></div>
+                  </div>
+                  <div class="stat-card-body">
+                    <h3 class="stat-number counter-value">{{ '{:,.0f}'.format(stats.total_expenses) }}</h3>
+                    <p class="stat-label">المصروفات <i class="fas fa-question-circle help-icon" data-bs-toggle="popover" data-bs-content="إجمالي قيمة المصروفات المسجلة"></i></p>
+                  </div>
+                  <div class="stat-card-footer">
+                    <a href="{{ url_for('expenses_list') }}" class="stat-link">عرض التفاصيل <i class="fas fa-arrow-left"></i></a>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card - الفروع -->
+            <div class="col-xl-3 col-lg-4 col-md-6">
+              <div class="stat-card card-receipt">
+                <div class="stat-card-inner">
+                  <div class="stat-card-header">
+                    <div class="stat-icon"><i class="fas fa-code-branch"></i></div>
+                    <div class="stat-trend trend-up"><i class="fas fa-arrow-up"></i><span>نشط</span></div>
+                  </div>
+                  <div class="stat-card-body">
+                    <h3 class="stat-number counter-value">{{ stats.branches_count }}</h3>
+                    <p class="stat-label">الفروع <i class="fas fa-question-circle help-icon" data-bs-toggle="popover" data-bs-content="عدد فروع المتجر"></i></p>
+                  </div>
+                  <div class="stat-card-footer">
+                    <a href="{{ url_for('branches_list') }}" class="stat-link">عرض التفاصيل <i class="fas fa-arrow-left"></i></a>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card - الموردين -->
+            <div class="col-xl-3 col-lg-4 col-md-6">
+              <div class="stat-card card-suppliers">
+                <div class="stat-card-inner">
+                  <div class="stat-card-header">
+                    <div class="stat-icon"><i class="fas fa-truck"></i></div>
+                    <div class="stat-trend trend-up"><i class="fas fa-arrow-up"></i><span>نشط</span></div>
+                  </div>
+                  <div class="stat-card-body">
+                    <h3 class="stat-number counter-value">{{ stats.suppliers_count }}</h3>
+                    <p class="stat-label">الموردين <i class="fas fa-question-circle help-icon" data-bs-toggle="popover" data-bs-content="عدد الموردين المسجلين في النظام"></i></p>
+                  </div>
+                  <div class="stat-card-footer">
+                    <a href="{{ url_for('suppliers_list') }}" class="stat-link">عرض التفاصيل <i class="fas fa-arrow-left"></i></a>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- ==================== CHARTS & TOP ITEMS ==================== -->
+        <section class="charts-section" data-section="overview sales purchases">
+          <div class="row g-4">
+
+            <!-- Chart: Monthly Sales/Purchases/Profit -->
+            <div class="col-xl-8 col-lg-7">
+              <div class="chart-card">
+                <div class="chart-card-header">
+                  <div class="chart-card-title">
+                    <h4>تحليل المبيعات والمشتريات <i class="fas fa-question-circle help-icon" data-bs-toggle="popover" data-bs-content="مخطط يظهر مقارنة بين المبيعات والمشتريات شهرياً على مدار العام"></i></h4>
+                    <small>آخر 6 أشهر</small>
+                  </div>
+                  <div class="chart-card-actions">
+                    <button class="btn-chart-action" onclick="window.print()"><i class="fas fa-download"></i></button>
+                  </div>
+                </div>
+                <div class="chart-card-body real-chart">
+                  <div class="bar-wrapper" id="monthlyChart">
+                    {% set max_val = monthly|map(attribute='sales')|max %}
+                    {% if max_val == 0 %}{% set max_val = 1 %}{% endif %}
+                    {% for m in monthly %}
+                    <div class="bar-group">
+                      <div class="bar-column">
+                        {% set sales_pct = (m.sales / max_val * 100)|int %}
+                        {% set purchases_pct = (m.purchases / max_val * 100)|int %}
+                        <div class="bar purchases-bar" style="height:{{ purchases_pct }}px;" title="مشتريات: {{ '{:,.0f}'.format(m.purchases) }} ج.م"></div>
+                        <div class="bar sales-bar" style="height:{{ sales_pct }}px;" title="مبيعات: {{ '{:,.0f}'.format(m.sales) }} ج.م"></div>
+                      </div>
+                      <div class="bar-label">{{ m.label }}</div>
+                    </div>
+                    {% endfor %}
+                  </div>
+                  <div class="chart-legend">
+                    <span class="legend-item"><span class="legend-dot" style="background:#4f46e5;"></span> المبيعات</span>
+                    <span class="legend-item"><span class="legend-dot" style="background:#d97706;"></span> المشتريات</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Top Items -->
+            <div class="col-xl-4 col-lg-5">
+              <div class="top-items-panel">
+                <div class="top-items-header">
+                  <div>
+                    <h4>أفضل الأصناف مبيعًا <i class="fas fa-question-circle help-icon" data-bs-toggle="popover" data-bs-content="قائمة بأكثر 5 أصناف مبيعاً حسب الكمية المباعة"></i></h4>
+                    <small>حسب الكمية المبيعة</small>
+                  </div>
+                </div>
+                <div class="top-items-body">
+                  {% if top_items %}
+                    {% for item in top_items %}
+                    <div class="top-item-card">
+                      <div class="top-item-rank rank-{{ loop.index if loop.index <= 3 else 4 }}">{{ loop.index }}</div>
+                      <div class="top-item-details">
+                        <span class="top-item-name">{{ item.name }}</span>
+                        <span class="top-item-count">{{ item.quantity }} وحدة مباعة</span>
+                      </div>
+                      <span class="top-item-rev">{{ '{:,.0f}'.format(item.revenue) }} ج.م</span>
+                    </div>
+                    {% endfor %}
+                  {% else %}
+                    <div class="top-item-empty">
+                      <i class="fas fa-chart-bar"></i>
+                      <p>لا توجد مبيعات كافية بعد</p>
+                    </div>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- ==================== RECENT TRANSACTIONS ==================== -->
+        <section style="margin-top:24px;" data-section="overview sales purchases">
+          <div class="row g-4">
+            <!-- Recent Sales -->
+            <div class="col-xl-6">
+              <div class="chart-card">
+                <div class="chart-card-header">
+                  <div class="chart-card-title">
+                    <h4><i class="fas fa-chart-line" style="color:#10b981;margin-left:6px;"></i> آخر المبيعات <i class="fas fa-question-circle help-icon" data-bs-toggle="popover" data-bs-content="أحدث 5 فواتير مبيعات ومشتريات مع إمكانية الطباعة والعرض"></i></h4>
+                  </div>
+                  <div class="chart-card-actions">
+                    <a href="{{ url_for('sales_list') }}" class="btn-chart-action"><i class="fas fa-external-link-alt"></i></a>
+                  </div>
+                </div>
+                <div class="chart-card-body" style="padding:0;">
+                  {% if stats.recent_sales %}
+                  <div class="table-responsive">
+                    <table class="table" style="margin:0;font-size:13px;">
+                      <thead>
+                        <tr>
+                          <th>الفاتورة</th>
+                          <th>العميل</th>
+                          <th>الإجمالي</th>
+                          <th>التاريخ</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for s in stats.recent_sales %}
+                        <tr>
+                          <td><a href="{{ url_for('sale_view', id=s.id) }}" style="color:var(--primary);font-weight:600;">#{{ s.invoice_number }}</a></td>
+                          <td>{{ s.customer.name if s.customer else 'نقدي' }}</td>
+                          <td>{{ '{:,.0f}'.format(s.total) }} ج.م</td>
+                          <td style="color:var(--text-muted);font-size:12px;">{{ s.created_at.strftime('%Y-%m-%d') }}</td>
+                        </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
+                  {% else %}
+                  {% with title='لا توجد مبيعات', description='لم يتم تسجيل أي فواتير مبيعات بعد.' %}
+                  {% include 'empty_state.html' %}
+                  {% endwith %}
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+
+            <!-- Recent Purchases -->
+            <div class="col-xl-6">
+              <div class="chart-card">
+                <div class="chart-card-header">
+                  <div class="chart-card-title">
+                    <h4><i class="fas fa-shopping-cart" style="color:#f59e0b;margin-left:6px;"></i> آخر المشتريات <i class="fas fa-question-circle help-icon" data-bs-toggle="popover" data-bs-content="أحدث 5 فواتير مبيعات ومشتريات مع إمكانية الطباعة والعرض"></i></h4>
+                  </div>
+                  <div class="chart-card-actions">
+                    <a href="{{ url_for('purchases_list') }}" class="btn-chart-action"><i class="fas fa-external-link-alt"></i></a>
+                  </div>
+                </div>
+                <div class="chart-card-body" style="padding:0;">
+                  {% if stats.recent_purchases %}
+                  <div class="table-responsive">
+                    <table class="table" style="margin:0;font-size:13px;">
+                      <thead>
+                        <tr>
+                          <th>الفاتورة</th>
+                          <th>المورد</th>
+                          <th>الإجمالي</th>
+                          <th>التاريخ</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for p in stats.recent_purchases %}
+                        <tr>
+                          <td><a href="{{ url_for('purchase_view', id=p.id) }}" style="color:#d97706;font-weight:600;">#{{ p.invoice_number }}</a></td>
+                          <td>{{ p.supplier.name if p.supplier else '-' }}</td>
+                          <td>{{ '{:,.0f}'.format(p.total) }} ج.م</td>
+                          <td style="color:var(--text-muted);font-size:12px;">{{ p.created_at.strftime('%Y-%m-%d') }}</td>
+                        </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
+                  {% else %}
+                  {% with title='لا توجد مشتريات', description='لم يتم تسجيل أي فواتير مشتريات بعد.' %}
+                  {% include 'empty_state.html' %}
+                  {% endwith %}
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== MONTHLY PROFIT TABLE ==================== -->
+        <section style="margin-top:24px;" data-section="overview profits">
+          <div class="chart-card">
+            <div class="chart-card-header">
+              <div class="chart-card-title">
+                <h4><i class="fas fa-table" style="color:var(--primary);margin-left:6px;"></i> التحليل المالي الشهري <i class="fas fa-question-circle help-icon" data-bs-toggle="popover" data-bs-content="جدول تفصيلي يظهر المبيعات وتكلفة البضاعة والمصروفات وصافي الربح لكل شهر"></i></h4>
+                <small>آخر 6 أشهر</small>
+              </div>
+            </div>
+            <div class="chart-card-body" style="padding:0;">
+              <div class="table-responsive">
+                <table class="table" style="margin:0;font-size:13px;">
+                  <thead>
+                    <tr>
+                      <th>الشهر</th>
+                      <th>المبيعات</th>
+                      <th>تكلفة البضاعة</th>
+                      <th>المصروفات</th>
+                      <th>صافي الربح</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for m in monthly %}
+                    <tr>
+                      <td style="font-weight:700;">{{ m.label }}</td>
+                      <td style="color:#10b981;">{{ '{:,.0f}'.format(m.sales) }} ج.م</td>
+                      <td style="color:#d97706;">{{ '{:,.0f}'.format(m.cogs) }} ج.م</td>
+                      <td style="color:#ef4444;">{{ '{:,.0f}'.format(m.expenses) }} ج.م</td>
+                      <td style="font-weight:800;color:{% if m.profit > 0 %}#10b981{% else %}#ef4444{% endif %};">
+                        {{ '{:,.0f}'.format(m.profit) }} ج.م
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                  <tfoot>
+                    <tr style="background:#f8f9fc;font-weight:800;">
+                      <td>الإجمالي</td>
+                      <td>{{ '{:,.0f}'.format(monthly|sum(attribute='sales')) }} ج.م</td>
+                      <td>{{ '{:,.0f}'.format(monthly|sum(attribute='cogs')) }} ج.م</td>
+                      <td>{{ '{:,.0f}'.format(monthly|sum(attribute='expenses')) }} ج.م</td>
+                      <td style="color:{% if (monthly|sum(attribute='profit')) > 0 %}#10b981{% else %}#ef4444{% endif %};">
+                        {{ '{:,.0f}'.format(monthly|sum(attribute='profit')) }} ج.م
+                      </td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== TAB: SALES STATS ==================== -->
+        <section class="tab-panel-content" data-tab-content="sales" style="display:none;margin-top:24px;">
+          <div class="row g-4">
+            <div class="col-12">
+              <div class="chart-card">
+                <div class="chart-card-header">
+                  <div class="chart-card-title">
+                    <h4><i class="fas fa-chart-bar" style="color:#10b981;margin-left:6px;"></i> إحصائيات المبيعات الشهرية</h4>
+                    <small>آخر 6 أشهر</small>
+                  </div>
+                </div>
+                <div class="chart-card-body" style="padding:0;">
+                  <div class="table-responsive">
+                    <table class="table" style="margin:0;font-size:13px;">
+                      <thead>
+                        <tr><th>الشهر</th><th>عدد الفواتير</th><th>الإجمالي</th><th>المدفوع</th><th>المتبقي</th></tr>
+                      </thead>
+                      <tbody>
+                        {% for m in sales_monthly %}
+                        <tr>
+                          <td style="font-weight:700;">{{ m.label }}</td>
+                          <td>{{ m.count }} فاتورة</td>
+                          <td style="color:#10b981;">{{ '{:,.0f}'.format(m.total) }} ج.م</td>
+                          <td style="color:#4f46e5;">{{ '{:,.0f}'.format(m.paid) }} ج.م</td>
+                          <td style="color:#ef4444;">{{ '{:,.0f}'.format(m.remaining) }} ج.م</td>
+                        </tr>
+                        {% endfor %}
+                      </tbody>
+                      <tfoot>
+                        <tr style="background:#f8f9fc;font-weight:800;">
+                          <td>الإجمالي</td>
+                          <td>{{ sales_monthly|sum(attribute='count') }} فاتورة</td>
+                          <td>{{ '{:,.0f}'.format(sales_monthly|sum(attribute='total')) }} ج.م</td>
+                          <td>{{ '{:,.0f}'.format(sales_monthly|sum(attribute='paid')) }} ج.م</td>
+                          <td>{{ '{:,.0f}'.format(sales_monthly|sum(attribute='remaining')) }} ج.م</td>
+                        </tr>
+                      </tfoot>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-xl-6">
+              <div class="chart-card">
+                <div class="chart-card-header">
+                  <div class="chart-card-title">
+                    <h4><i class="fas fa-chart-line" style="color:#10b981;margin-left:6px;"></i> آخر المبيعات</h4>
+                  </div>
+                  <div class="chart-card-actions">
+                    <a href="{{ url_for('sales_list') }}" class="btn-chart-action"><i class="fas fa-external-link-alt"></i></a>
+                  </div>
+                </div>
+                <div class="chart-card-body" style="padding:0;">
+                  {% if stats.recent_sales %}
+                  <div class="table-responsive">
+                    <table class="table" style="margin:0;font-size:13px;">
+                      <thead><tr><th>الفاتورة</th><th>العميل</th><th>الإجمالي</th><th>الحالة</th></tr></thead>
+                      <tbody>
+                        {% for s in stats.recent_sales %}
+                        <tr>
+                          <td><a href="{{ url_for('sale_view', id=s.id) }}" style="color:var(--primary);font-weight:600;">#{{ s.invoice_number }}</a></td>
+                          <td>{{ s.customer.name if s.customer else 'نقدي' }}</td>
+                          <td>{{ '{:,.0f}'.format(s.total) }} ج.م</td>
+                          <td><span class="badge-status {% if s.status == 'paid' %}badge-active{% elif s.status == 'partial' %}badge-warning{% else %}badge-inactive{% endif %}">{{ 'مدفوع' if s.status == 'paid' else 'جزئي' if s.status == 'partial' else 'غير مدفوع' }}</span></td>
+                        </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
+                  {% else %}
+                  {% with title='لا توجد مبيعات', description='لم يتم تسجيل أي فواتير مبيعات بعد.' %}
+                  {% include 'empty_state.html' %}
+                  {% endwith %}
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+            <div class="col-xl-6">
+              <div class="chart-card">
+                <div class="chart-card-header">
+                  <div class="chart-card-title">
+                    <h4><i class="fas fa-trophy" style="color:#f59e0b;margin-left:6px;"></i> أفضل الأصناف مبيعاً</h4>
+                  </div>
+                </div>
+                <div class="chart-card-body">
+                  {% if top_items %}
+                    {% for item in top_items %}
+                    <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border-light);">
+                      <span style="width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:white;{% if loop.index == 1 %}background:linear-gradient(135deg,#f59e0b,#f97316){% elif loop.index == 2 %}background:linear-gradient(135deg,#6366f1,#4f46e5){% elif loop.index == 3 %}background:linear-gradient(135deg,#10b981,#059669){% else %}background:#6b7280{% endif %};">{{ loop.index }}</span>
+                      <div style="flex:1;"><strong style="font-size:13px;">{{ item.name }}</strong><br><small style="color:var(--text-muted);">{{ item.quantity }} وحدة</small></div>
+                      <strong style="color:var(--primary);">{{ '{:,.0f}'.format(item.revenue) }} ج.م</strong>
+                    </div>
+                    {% endfor %}
+                  {% else %}
+                  <p style="text-align:center;color:var(--text-muted);padding:20px;">لا توجد بيانات</p>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== TAB: PURCHASES STATS ==================== -->
+        <section class="tab-panel-content" data-tab-content="purchases" style="display:none;margin-top:24px;">
+          <div class="row g-4">
+            <div class="col-12">
+              <div class="chart-card">
+                <div class="chart-card-header">
+                  <div class="chart-card-title">
+                    <h4><i class="fas fa-shopping-bag" style="color:#d97706;margin-left:6px;"></i> إحصائيات المشتريات الشهرية</h4>
+                    <small>آخر 6 أشهر</small>
+                  </div>
+                </div>
+                <div class="chart-card-body" style="padding:0;">
+                  <div class="table-responsive">
+                    <table class="table" style="margin:0;font-size:13px;">
+                      <thead>
+                        <tr><th>الشهر</th><th>عدد الفواتير</th><th>الإجمالي</th><th>المدفوع</th><th>المتبقي</th></tr>
+                      </thead>
+                      <tbody>
+                        {% for m in purchases_monthly %}
+                        <tr>
+                          <td style="font-weight:700;">{{ m.label }}</td>
+                          <td>{{ m.count }} فاتورة</td>
+                          <td style="color:#d97706;">{{ '{:,.0f}'.format(m.total) }} ج.م</td>
+                          <td style="color:#4f46e5;">{{ '{:,.0f}'.format(m.paid) }} ج.م</td>
+                          <td style="color:#ef4444;">{{ '{:,.0f}'.format(m.remaining) }} ج.م</td>
+                        </tr>
+                        {% endfor %}
+                      </tbody>
+                      <tfoot>
+                        <tr style="background:#f8f9fc;font-weight:800;">
+                          <td>الإجمالي</td>
+                          <td>{{ purchases_monthly|sum(attribute='count') }} فاتورة</td>
+                          <td>{{ '{:,.0f}'.format(purchases_monthly|sum(attribute='total')) }} ج.م</td>
+                          <td>{{ '{:,.0f}'.format(purchases_monthly|sum(attribute='paid')) }} ج.م</td>
+                          <td>{{ '{:,.0f}'.format(purchases_monthly|sum(attribute='remaining')) }} ج.م</td>
+                        </tr>
+                      </tfoot>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-xl-6">
+              <div class="chart-card">
+                <div class="chart-card-header">
+                  <div class="chart-card-title">
+                    <h4><i class="fas fa-shopping-cart" style="color:#f59e0b;margin-left:6px;"></i> آخر المشتريات</h4>
+                  </div>
+                  <div class="chart-card-actions">
+                    <a href="{{ url_for('purchases_list') }}" class="btn-chart-action"><i class="fas fa-external-link-alt"></i></a>
+                  </div>
+                </div>
+                <div class="chart-card-body" style="padding:0;">
+                  {% if stats.recent_purchases %}
+                  <div class="table-responsive">
+                    <table class="table" style="margin:0;font-size:13px;">
+                      <thead><tr><th>الفاتورة</th><th>المورد</th><th>الإجمالي</th><th>الحالة</th></tr></thead>
+                      <tbody>
+                        {% for p in stats.recent_purchases %}
+                        <tr>
+                          <td><a href="{{ url_for('purchase_view', id=p.id) }}" style="color:#d97706;font-weight:600;">#{{ p.invoice_number }}</a></td>
+                          <td>{{ p.supplier.name if p.supplier else '-' }}</td>
+                          <td>{{ '{:,.0f}'.format(p.total) }} ج.م</td>
+                          <td><span class="badge-status {% if p.status == 'paid' %}badge-active{% elif p.status == 'partial' %}badge-warning{% else %}badge-inactive{% endif %}">{{ 'مدفوع' if p.status == 'paid' else 'جزئي' if p.status == 'partial' else 'غير مدفوع' }}</span></td>
+                        </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
+                  {% else %}
+                  {% with title='لا توجد مشتريات', description='لم يتم تسجيل أي فواتير مشتريات بعد.' %}
+                  {% include 'empty_state.html' %}
+                  {% endwith %}
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== TAB: RETURNS STATS ==================== -->
+        <section class="tab-panel-content" data-tab-content="returns" style="display:none;margin-top:24px;">
+          <div class="row g-4">
+            <div class="col-xl-3 col-lg-4 col-md-6">
+              <div class="stat-card card-exchange">
+                <div class="stat-card-inner">
+                  <div class="stat-card-header">
+                    <div class="stat-icon"><i class="fas fa-undo-alt"></i></div>
+                  </div>
+                  <div class="stat-card-body">
+                    <h3 class="stat-number">{{ stats.returns_count }}</h3>
+                    <p class="stat-label">عدد المرتجعات</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-xl-3 col-lg-4 col-md-6">
+              <div class="stat-card card-branches">
+                <div class="stat-card-inner">
+                  <div class="stat-card-header">
+                    <div class="stat-icon"><i class="fas fa-money-bill-wave"></i></div>
+                  </div>
+                  <div class="stat-card-body">
+                    <h3 class="stat-number">{{ '{:,.0f}'.format(stats.total_returns) }}</h3>
+                    <p class="stat-label">قيمة المرتجعات</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-12">
+              <div class="chart-card">
+                <div class="chart-card-header">
+                  <div class="chart-card-title">
+                    <h4><i class="fas fa-undo-alt" style="color:#ec4899;margin-left:6px;"></i> المرتجعات الشهرية</h4>
+                    <small>آخر 6 أشهر</small>
+                  </div>
+                </div>
+                <div class="chart-card-body" style="padding:0;">
+                  <div class="table-responsive">
+                    <table class="table" style="margin:0;font-size:13px;">
+                      <thead><tr><th>الشهر</th><th>عدد المرتجعات</th><th>القيمة الإجمالية</th></tr></thead>
+                      <tbody>
+                        {% for m in returns_monthly %}
+                        <tr>
+                          <td style="font-weight:700;">{{ m.label }}</td>
+                          <td>{{ m.count }} مرتجع</td>
+                          <td style="color:#ec4899;">{{ '{:,.0f}'.format(m.total) }} ج.م</td>
+                        </tr>
+                        {% endfor %}
+                      </tbody>
+                      <tfoot>
+                        <tr style="background:#f8f9fc;font-weight:800;">
+                          <td>الإجمالي</td>
+                          <td>{{ returns_monthly|sum(attribute='count') }} مرتجع</td>
+                          <td>{{ '{:,.0f}'.format(returns_monthly|sum(attribute='total')) }} ج.م</td>
+                        </tr>
+                      </tfoot>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-12">
+              <div class="chart-card">
+                <div class="chart-card-header">
+                  <div class="chart-card-title">
+                    <h4><i class="fas fa-list" style="color:#ec4899;margin-left:6px;"></i> آخر المرتجعات</h4>
+                  </div>
+                  <div class="chart-card-actions">
+                    <a href="{{ url_for('returns_list') }}" class="btn-chart-action"><i class="fas fa-external-link-alt"></i></a>
+                  </div>
+                </div>
+                <div class="chart-card-body" style="padding:0;">
+                  {% if recent_returns %}
+                  <div class="table-responsive">
+                    <table class="table" style="margin:0;font-size:13px;">
+                      <thead><tr><th>الرقم</th><th>العميل</th><th>القيمة</th><th>السبب</th><th>التاريخ</th></tr></thead>
+                      <tbody>
+                        {% for r in recent_returns %}
+                        <tr>
+                          <td><a href="{{ url_for('return_view', id=r.id) }}" style="color:#ec4899;font-weight:600;">#{{ r.return_number }}</a></td>
+                          <td>{{ r.customer.name if r.customer else '-' }}</td>
+                          <td>{{ '{:,.0f}'.format(r.total) }} ج.م</td>
+                          <td>{{ (r.reason or '-')[:30] }}</td>
+                          <td style="color:var(--text-muted);font-size:12px;">{{ r.created_at.strftime('%Y-%m-%d') }}</td>
+                        </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
+                  {% else %}
+                  {% with title='لا توجد مرتجعات', description='لم يتم تسجيل أي مرتجعات بعد.' %}
+                  {% include 'empty_state.html' %}
+                  {% endwith %}
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== TAB: PROFITS STATS ==================== -->
+        <section class="tab-panel-content" data-tab-content="profits" style="display:none;margin-top:24px;">
+          <div class="row g-4">
+            <div class="col-xl-3 col-lg-4 col-md-6">
+              <div class="stat-card card-sales">
+                <div class="stat-card-inner">
+                  <div class="stat-card-header">
+                    <div class="stat-icon"><i class="fas fa-chart-line"></i></div>
+                  </div>
+                  <div class="stat-card-body">
+                    <h3 class="stat-number">{{ '{:,.0f}'.format(stats.total_sales) }}</h3>
+                    <p class="stat-label">إجمالي المبيعات</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-xl-3 col-lg-4 col-md-6">
+              <div class="stat-card card-purchases">
+                <div class="stat-card-inner">
+                  <div class="stat-card-header">
+                    <div class="stat-icon"><i class="fas fa-shopping-cart"></i></div>
+                  </div>
+                  <div class="stat-card-body">
+                    <h3 class="stat-number">{{ '{:,.0f}'.format(stats.total_purchases) }}</h3>
+                    <p class="stat-label">إجمالي المشتريات</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-xl-3 col-lg-4 col-md-6">
+              <div class="stat-card card-exchange">
+                <div class="stat-card-inner">
+                  <div class="stat-card-header">
+                    <div class="stat-icon"><i class="fas fa-coins"></i></div>
+                  </div>
+                  <div class="stat-card-body">
+                    <h3 class="stat-number">{{ '{:,.0f}'.format(stats.total_expenses) }}</h3>
+                    <p class="stat-label">إجمالي المصروفات</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-xl-3 col-lg-4 col-md-6">
+              <div class="stat-card card-branches">
+                <div class="stat-card-inner">
+                  <div class="stat-card-header">
+                    <div class="stat-icon"><i class="fas fa-chart-pie"></i></div>
+                  </div>
+                  <div class="stat-card-body">
+                    <h3 class="stat-number" style="color:{% if stats.profit > 0 %}#10b981{% else %}#ef4444{% endif %};">{{ '{:,.0f}'.format(stats.profit) }}</h3>
+                    <p class="stat-label">صافي الربح</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-12">
+              <div class="chart-card">
+                <div class="chart-card-header">
+                  <div class="chart-card-title">
+                    <h4><i class="fas fa-table" style="color:var(--primary);margin-left:6px;"></i> التحليل المالي الشهري</h4>
+                    <small>آخر 6 أشهر</small>
+                  </div>
+                </div>
+                <div class="chart-card-body" style="padding:0;">
+                  <div class="table-responsive">
+                    <table class="table" style="margin:0;font-size:13px;">
+                      <thead>
+                        <tr><th>الشهر</th><th>المبيعات</th><th>تكلفة البضاعة</th><th>المصروفات</th><th>صافي الربح</th></tr>
+                      </thead>
+                      <tbody>
+                        {% for m in monthly %}
+                        <tr>
+                          <td style="font-weight:700;">{{ m.label }}</td>
+                          <td style="color:#10b981;">{{ '{:,.0f}'.format(m.sales) }} ج.م</td>
+                          <td style="color:#d97706;">{{ '{:,.0f}'.format(m.cogs) }} ج.م</td>
+                          <td style="color:#ef4444;">{{ '{:,.0f}'.format(m.expenses) }} ج.م</td>
+                          <td style="font-weight:800;color:{% if m.profit > 0 %}#10b981{% else %}#ef4444{% endif %};">{{ '{:,.0f}'.format(m.profit) }} ج.م</td>
+                        </tr>
+                        {% endfor %}
+                      </tbody>
+                      <tfoot>
+                        <tr style="background:#f8f9fc;font-weight:800;">
+                          <td>الإجمالي</td>
+                          <td>{{ '{:,.0f}'.format(monthly|sum(attribute='sales')) }} ج.م</td>
+                          <td>{{ '{:,.0f}'.format(monthly|sum(attribute='cogs')) }} ج.م</td>
+                          <td>{{ '{:,.0f}'.format(monthly|sum(attribute='expenses')) }} ج.م</td>
+                          <td style="color:{% if (monthly|sum(attribute='profit')) > 0 %}#10b981{% else %}#ef4444{% endif %};">{{ '{:,.0f}'.format(monthly|sum(attribute='profit')) }} ج.م</td>
+                        </tr>
+                      </tfoot>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== TAB: CUSTOMERS STATS ==================== -->
+        <section class="tab-panel-content" data-tab-content="customers" style="display:none;margin-top:24px;">
+          <div class="row g-4">
+            <div class="col-xl-3 col-lg-4 col-md-6">
+              <div class="stat-card card-clients">
+                <div class="stat-card-inner">
+                  <div class="stat-card-header">
+                    <div class="stat-icon"><i class="fas fa-user-friends"></i></div>
+                  </div>
+                  <div class="stat-card-body">
+                    <h3 class="stat-number">{{ stats.customers_count }}</h3>
+                    <p class="stat-label">إجمالي العملاء</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-xl-3 col-lg-4 col-md-6">
+              <div class="stat-card card-sales">
+                <div class="stat-card-inner">
+                  <div class="stat-card-header">
+                    <div class="stat-icon"><i class="fas fa-file-invoice-dollar"></i></div>
+                  </div>
+                  <div class="stat-card-body">
+                    <h3 class="stat-number">{{ stats.sales_count }}</h3>
+                    <p class="stat-label">إجمالي الفواتير</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-xl-3 col-lg-4 col-md-6">
+              <div class="stat-card card-purchases">
+                <div class="stat-card-inner">
+                  <div class="stat-card-header">
+                    <div class="stat-icon"><i class="fas fa-money-bill-wave"></i></div>
+                  </div>
+                  <div class="stat-card-body">
+                    <h3 class="stat-number">{{ '{:,.0f}'.format(stats.total_sales) }}</h3>
+                    <p class="stat-label">إجمالي المبيعات</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-12">
+              <div class="chart-card">
+                <div class="chart-card-header">
+                  <div class="chart-card-title">
+                    <h4><i class="fas fa-trophy" style="color:#f59e0b;margin-left:6px;"></i> أفضل العملاء</h4>
+                    <small>حسب قيمة المشتريات</small>
+                  </div>
+                </div>
+                <div class="chart-card-body" style="padding:0;">
+                  {% if top_customers %}
+                  <div class="table-responsive">
+                    <table class="table" style="margin:0;font-size:13px;">
+                      <thead><tr><th>#</th><th>العميل</th><th>عدد الفواتير</th><th>الإجمالي</th><th>المدفوع</th><th>المتبقي</th></tr></thead>
+                      <tbody>
+                        {% for c in top_customers %}
+                        <tr>
+                          <td><span style="width:28px;height:28px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:white;{% if loop.index == 1 %}background:linear-gradient(135deg,#f59e0b,#f97316){% elif loop.index == 2 %}background:linear-gradient(135deg,#6366f1,#4f46e5){% elif loop.index == 3 %}background:linear-gradient(135deg,#10b981,#059669){% else %}background:#6b7280{% endif %};">{{ loop.index }}</span></td>
+                          <td><strong>{{ c.name }}</strong></td>
+                          <td>{{ c.invoices }} فاتورة</td>
+                          <td style="color:#10b981;">{{ '{:,.0f}'.format(c.total) }} ج.م</td>
+                          <td style="color:#4f46e5;">{{ '{:,.0f}'.format(c.paid) }} ج.م</td>
+                          <td style="color:{% if c.balance > 0 %}#ef4444{% else %}#10b981{% endif %};">{{ '{:,.0f}'.format(c.balance) }} ج.م</td>
+                        </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
+                  {% else %}
+                  {% with title='لا يوجد عملاء', description='لم يتم تسجيل أي عملاء بعد.' %}
+                  {% include 'empty_state.html' %}
+                  {% endwith %}
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+
+      {% include 'footer.html' %}
+
+    </main>
+
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Custom JS -->
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+  <script>
+    // Counter animation for stat numbers
+    document.querySelectorAll('.counter-value').forEach(function(el) {
+      var target = parseFloat(el.textContent.replace(/,/g, '')) || 0;
+      if (target === 0) return;
+      var duration = 1000;
+      var start = 0;
+      var startTime = null;
+      function step(timestamp) {
+        if (!startTime) startTime = timestamp;
+        var progress = Math.min((timestamp - startTime) / duration, 1);
+        var current = Math.floor(progress * target);
+        el.textContent = current.toLocaleString('ar-EG');
+        if (progress < 1) {
+          requestAnimationFrame(step);
+        } else {
+          el.textContent = target.toLocaleString('ar-EG');
+        }
+      }
+      requestAnimationFrame(step);
+    });
+  </script>
+</body>
+</html>

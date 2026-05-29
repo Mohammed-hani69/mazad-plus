@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>إنشاء حساب - Mazad Plus</title>
+  <link rel="icon" href="{{ url_for('static', filename='favicon.png') }}">
+
+  <!-- Bootstrap 5 RTL -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css">
+  <!-- Font Awesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <!-- Google Font - Cairo -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --primary-light: #6366f1;
+      --primary-dark: #4338ca;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Cairo', sans-serif;
+      background: linear-gradient(135deg, #f5f6fa 0%, #eef2ff 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: -50%;
+      right: -20%;
+      width: 800px;
+      height: 800px;
+      background: radial-gradient(circle, rgba(79, 70, 229, 0.06) 0%, transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .auth-container {
+      width: 100%;
+      max-width: 500px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .auth-card {
+      background: white;
+      border-radius: 20px;
+      padding: 40px 32px;
+      box-shadow: 0 10px 40px rgba(79, 70, 229, 0.1);
+      border: 1px solid #e5e7eb;
+    }
+
+    .auth-logo {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .auth-logo img {
+      height: 56px;
+      width: auto;
+      margin-bottom: 10px;
+    }
+
+    .auth-logo h2 {
+      font-size: 24px;
+      font-weight: 800;
+      color: #1f2937;
+      margin: 0;
+    }
+
+    .auth-logo p {
+      font-size: 14px;
+      color: #6b7280;
+      margin: 4px 0 0;
+    }
+
+    .auth-divider {
+      height: 1px;
+      background: #e5e7eb;
+      margin: 20px 0;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: #1f2937;
+      margin-bottom: 6px;
+    }
+
+    .form-group .input-wrapper {
+      position: relative;
+    }
+
+    .form-group .input-wrapper i {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #9ca3af;
+      font-size: 15px;
+      pointer-events: none;
+    }
+
+    .form-group .form-control {
+      padding: 12px 44px 12px 14px;
+      border: 2px solid #e5e7eb;
+      border-radius: 10px;
+      font-size: 14px;
+      font-family: 'Cairo', sans-serif;
+      color: #1f2937;
+      transition: all 0.3s ease;
+      height: auto;
+    }
+
+    .form-group .form-control:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+    }
+
+    .form-group .form-control::placeholder {
+      color: #9ca3af;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 14px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 700;
+      font-family: 'Cairo', sans-serif;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-submit:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(79, 70, 229, 0.3);
+    }
+
+    .password-hint {
+      font-size: 12px;
+      color: #9ca3af;
+      margin-top: 4px;
+    }
+
+    .auth-footer {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .auth-footer p {
+      font-size: 14px;
+      color: #6b7280;
+    }
+
+    .auth-footer a {
+      color: var(--primary);
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .auth-footer a:hover {
+      text-decoration: underline;
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: #6b7280;
+      text-decoration: none;
+      margin-bottom: 16px;
+      transition: color 0.3s;
+    }
+
+    .back-link:hover {
+      color: var(--primary);
+    }
+
+    .alert {
+      border-radius: 10px;
+      font-size: 14px;
+      padding: 12px 16px;
+      margin-bottom: 16px;
+    }
+
+    .terms-text {
+      font-size: 12px;
+      color: #9ca3af;
+      text-align: center;
+      margin-top: 12px;
+    }
+
+    .terms-text a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    @media (max-width: 480px) {
+      .auth-card { padding: 28px 20px; }
+      .form-row { grid-template-columns: 1fr; }
+      .auth-logo img { height: 48px; }
+      .auth-logo h2 { font-size: 20px; }
+    }
+    @media (max-width: 575px) { body { padding: 12px; } .auth-card { padding: 24px 16px; border-radius: 16px; } .auth-logo { margin-bottom: 18px; } .form-group { margin-bottom: 12px; } .btn-submit { padding: 12px; font-size: 15px; } .terms-text { font-size: 11px; } }
+  </style>
+</head>
+<body>
+
+  <div class="auth-container">
+    <div class="auth-card">
+
+      <a href="{{ url_for('landing') }}" class="back-link">
+        <i class="fas fa-arrow-right"></i>
+        العودة للرئيسية
+      </a>
+
+      <div class="auth-logo">
+        <img src="{{ url_for('static', filename='assets/images/logo.png') }}" alt="Mazad Plus">
+        <h2>إنشاء حساب جديد</h2>
+        <p>انضم إلى Mazad Plus وابدأ إدارة محلاتك</p>
+      </div>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+              {{ message }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      <form method="POST" action="{{ url_for('signup') }}" novalidate>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="form-group">
+          <label for="full_name">الاسم الكامل</label>
+          <div class="input-wrapper">
+            <i class="fas fa-user"></i>
+            <input type="text" id="full_name" name="full_name" class="form-control"
+                   placeholder="الاسم الثلاثي" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="email">البريد الإلكتروني</label>
+          <div class="input-wrapper">
+            <i class="fas fa-envelope"></i>
+            <input type="email" id="email" name="email" class="form-control"
+                   placeholder="example@domain.com" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="phone">رقم الهاتف (اختياري)</label>
+          <div class="input-wrapper">
+            <i class="fas fa-phone"></i>
+            <input type="tel" id="phone" name="phone" class="form-control"
+                   placeholder="01XXXXXXXXX">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="password">كلمة المرور</label>
+            <div class="input-wrapper">
+              <i class="fas fa-lock"></i>
+              <input type="password" id="password" name="password" class="form-control"
+                     placeholder="أقل شيء 6 أحرف" required minlength="6">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="confirm_password">تأكيد كلمة المرور</label>
+            <div class="input-wrapper">
+              <i class="fas fa-check-circle"></i>
+              <input type="password" id="confirm_password" name="confirm_password" class="form-control"
+                     placeholder="أعد إدخال كلمة المرور" required minlength="6">
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-submit">
+          <i class="fas fa-user-plus"></i>
+          إنشاء الحساب
+        </button>
+
+        {% if config.GOOGLE_CLIENT_ID %}
+        <div class="text-center my-3">
+          <div class="divider d-flex align-items-center">
+            <span class="mx-3 text-muted" style="font-size: 14px;">أو</span>
+          </div>
+          <a href="{{ url_for('auth_google') }}" class="btn btn-outline-dark w-100 mt-2" style="border-radius: 8px; padding: 10px;">
+            <svg width="20" height="20" viewBox="0 0 48 48" style="vertical-align: middle; margin-left: 8px;"><path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"></path><path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"></path><path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"></path><path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"></path></svg>
+            التسجيل عبر Google
+          </a>
+        </div>
+        {% endif %}
+
+        <style>
+          .divider:after, .divider:before {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: #dee2e6;
+          }
+        </style>
+
+        <p class="terms-text">
+          بالتسجيل أنت توافق على
+          <a href="#">شروط الخدمة</a>
+          و
+          <a href="#">سياسة الخصوصية</a>
+        </p>
+      </form>
+
+      <div class="auth-divider"></div>
+
+      <div class="auth-footer">
+        <p>
+          لديك حساب بالفعل؟
+          <a href="{{ url_for('login') }}">تسجيل الدخول</a>
+        </p>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

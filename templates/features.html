@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>المميزات - Mazad Plus</title>
+  <link rel="icon" href="{{ url_for('static', filename='favicon.png') }}">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --primary-light: #6366f1;
+      --primary-dark: #4338ca;
+      --secondary: #0ea5e9;
+      --accent: #f59e0b;
+      --success: #10b981;
+      --bg-main: #f5f6fa;
+      --text-dark: #0f172a;
+      --text-muted: #64748b;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Cairo', sans-serif;
+      background: var(--bg-main);
+      margin: 0;
+      padding: 0;
+      direction: rtl;
+      overflow-x: hidden;
+    }
+    .page-nav {
+      background: white;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 14px 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .page-nav .container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .page-nav a {
+      text-decoration: none;
+      color: var(--text-dark);
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: color 0.3s;
+    }
+    .page-nav a:hover { color: var(--primary); }
+    .page-nav img { height: 48px; width: auto; }
+
+    .page-wrap {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 40px 16px 60px;
+    }
+    .page-hero {
+      background: linear-gradient(135deg, #4f46e5, #0ea5e9);
+      border-radius: 20px;
+      padding: 40px;
+      text-align: center;
+      color: white;
+      margin-bottom: 40px;
+    }
+    .page-hero .icon { font-size: 48px; margin-bottom: 12px; }
+    .page-hero h1 { font-size: 30px; font-weight: 800; margin-bottom: 6px; }
+    .page-hero p { opacity: 0.85; font-size: 16px; margin: 0; }
+
+    .feat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+    .feat-card {
+      background: white;
+      border-radius: 18px;
+      padding: 28px 24px;
+      border: 1px solid #f1f5f9;
+      transition: all 0.4s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .feat-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: var(--grad, var(--primary));
+      transform: scaleX(0);
+      transition: transform 0.4s ease;
+    }
+    .feat-card:hover::before { transform: scaleX(1); }
+    .feat-card:hover {
+      box-shadow: 0 12px 40px rgba(79,70,229,0.08);
+      transform: translateY(-4px);
+    }
+    .feat-card .f-icon {
+      width: 50px; height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 14px;
+      font-size: 22px;
+      margin-bottom: 14px;
+    }
+    .feat-card h4 { font-size: 17px; font-weight: 700; color: var(--text-dark); margin-bottom: 6px; }
+    .feat-card p { font-size: 14px; color: var(--text-muted); margin: 0; line-height: 1.7; }
+    .feat-card .feat-tag {
+      display: inline-block;
+      margin-top: 10px;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 2px 10px;
+      border-radius: 50px;
+    }
+
+    .btn-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--primary);
+      color: white;
+      padding: 12px 28px;
+      border-radius: 12px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.3s;
+      margin-top: 30px;
+    }
+    .btn-back:hover {
+      background: var(--primary-dark);
+      color: white;
+      transform: translateY(-2px);
+    }
+
+    @media (max-width: 767px) {
+      .page-hero { padding: 24px; }
+      .page-hero h1 { font-size: 24px; }
+      .feat-grid { grid-template-columns: 1fr; }
+      .page-wrap { padding: 24px 12px 40px; }
+    }
+    @media (max-width: 575px) {
+      .page-hero { padding: 20px; border-radius: 14px; }
+      .page-hero h1 { font-size: 20px; }
+      .page-hero p { font-size: 14px; }
+      .feat-card { padding: 20px 16px; }
+      .page-nav img { height: 36px; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="page-nav">
+    <div class="container">
+      <a href="{{ url_for('landing') }}"><i class="fas fa-arrow-right"></i> العودة للرئيسية</a>
+      <a href="{{ url_for('landing') }}"><img src="{{ url_for('static', filename='assets/images/logo.png') }}" alt="Mazad Plus"></a>
+    </div>
+  </nav>
+
+  <div class="page-wrap">
+    <div class="page-hero">
+      <div class="icon"><i class="fas fa-star"></i></div>
+      <h1>مميزات Mazad Plus</h1>
+      <p>كل الأدوات التي تحتاجها لإدارة محلاتك بكفاءة واحترافية</p>
+    </div>
+
+    <div class="feat-grid">
+      <div class="feat-card" style="--grad:var(--primary)">
+        <div class="f-icon" style="background:rgba(79,70,229,0.08);color:var(--primary)"><i class="fas fa-store"></i></div>
+        <h4>إدارة الفروع</h4>
+        <p>تحكم كامل في جميع فروعك من لوحة تحكم واحدة. أضف فروعاً جديدة، خصّص إعدادات كل فرع، وتابع أداءه بشكل منفصل.</p>
+        <span class="feat-tag" style="background:rgba(79,70,229,0.08);color:var(--primary)">إدارة</span>
+      </div>
+      <div class="feat-card" style="--grad:var(--secondary)">
+        <div class="f-icon" style="background:rgba(14,165,233,0.08);color:var(--secondary)"><i class="fas fa-boxes"></i></div>
+        <h4>إدارة المخازن والمخزون</h4>
+        <p>تتبع كميات المخزون بدقة، مع تنبيهات عند انخفاض الكميات عن الحد الأدنى. دعم كامل للمخازن المتعددة.</p>
+        <span class="feat-tag" style="background:rgba(14,165,233,0.08);color:var(--secondary)">مخزون</span>
+      </div>
+      <div class="feat-card" style="--grad:var(--accent)">
+        <div class="f-icon" style="background:rgba(245,158,11,0.08);color:var(--accent)"><i class="fas fa-chart-line"></i></div>
+        <h4>تقارير وتحليلات</h4>
+        <p>تقارير دقيقة عن المبيعات والمشتريات والأرباح والخسائر. رسوم بيانية تفاعلية تساعدك على اتخاذ القرارات الصائبة.</p>
+        <span class="feat-tag" style="background:rgba(245,158,11,0.08);color:var(--accent)">تحليلات</span>
+      </div>
+      <div class="feat-card" style="--grad:var(--success)">
+        <div class="f-icon" style="background:rgba(16,185,129,0.08);color:var(--success)"><i class="fas fa-users"></i></div>
+        <h4>إدارة العملاء والموردين</h4>
+        <p>قاعدة بيانات متكاملة للعملاء والموردين مع كشوفات حساب مفصلة، سجل المدفوعات، وإمكانية تصدير البيانات.</p>
+        <span class="feat-tag" style="background:rgba(16,185,129,0.08);color:var(--success)">عملاء</span>
+      </div>
+      <div class="feat-card" style="--grad:var(--primary)">
+        <div class="f-icon" style="background:rgba(79,70,229,0.08);color:var(--primary)"><i class="fas fa-file-invoice"></i></div>
+        <h4>فواتير احترافية</h4>
+        <p>طباعة فواتير مبيعات ومشتريات بعدة تصاميم احترافية. دعم كامل للطباعة مع خيارات تخصيص القوالب.</p>
+        <span class="feat-tag" style="background:rgba(79,70,229,0.08);color:var(--primary)">فواتير</span>
+      </div>
+      <div class="feat-card" style="--grad:var(--secondary)">
+        <div class="f-icon" style="background:rgba(14,165,233,0.08);color:var(--secondary)"><i class="fas fa-cash-register"></i></div>
+        <h4>المبيعات والمشتريات</h4>
+        <p>إدارة عمليات البيع والشراء بسهولة. دعم كامل للإرجاع، الخصومات، وطرق الدفع المتعددة.</p>
+        <span class="feat-tag" style="background:rgba(14,165,233,0.08);color:var(--secondary)">مبيعات</span>
+      </div>
+      <div class="feat-card" style="--grad:var(--accent)">
+        <div class="f-icon" style="background:rgba(245,158,11,0.08);color:var(--accent)"><i class="fas fa-mobile-alt"></i></div>
+        <h4>تطبيق موبايل متكامل</h4>
+        <p>تطبيق للهواتف الذكية يتيح لك إدارة محلك من أي مكان. متوفر لأنظمة أندرويد مع جميع ميزات النظام.</p>
+        <span class="feat-tag" style="background:rgba(245,158,11,0.08);color:var(--accent)">موبايل</span>
+      </div>
+      <div class="feat-card" style="--grad:var(--success)">
+        <div class="f-icon" style="background:rgba(16,185,129,0.08);color:var(--success)"><i class="fas fa-shield-alt"></i></div>
+        <h4>أمان وحماية</h4>
+        <p>نظام آمن بالكامل مع تشفير البيانات، صلاحيات للمستخدمين، نسخ احتياطي تلقائي، وحماية ضد الاختراقات.</p>
+        <span class="feat-tag" style="background:rgba(16,185,129,0.08);color:var(--success)">أمان</span>
+      </div>
+      <div class="feat-card" style="--grad:var(--primary)">
+        <div class="f-icon" style="background:rgba(79,70,229,0.08);color:var(--primary)"><i class="fas fa-users-cog"></i></div>
+        <h4>إدارة الموظفين</h4>
+        <p>نظام صلاحيات متكامل للموظفين. حدد صلاحيات كل موظف بدقة وتحكم في الوصول للصفحات والميزات.</p>
+        <span class="feat-tag" style="background:rgba(79,70,229,0.08);color:var(--primary)">موظفين</span>
+      </div>
+      <div class="feat-card" style="--grad:var(--secondary)">
+        <div class="f-icon" style="background:rgba(14,165,233,0.08);color:var(--secondary)"><i class="fas fa-bell"></i></div>
+        <h4>إشعارات وتنبيهات</h4>
+        <p>نظام إشعارات متكامل ينبهك عند انخفاض المخزون، تواريخ الاستحقاق، وغيرها من الأحداث المهمة.</p>
+        <span class="feat-tag" style="background:rgba(14,165,233,0.08);color:var(--secondary)">إشعارات</span>
+      </div>
+      <div class="feat-card" style="--grad:var(--accent)">
+        <div class="f-icon" style="background:rgba(245,158,11,0.08);color:var(--accent)"><i class="fas fa-file-export"></i></div>
+        <h4>تصدير البيانات</h4>
+        <p>تصدير جميع التقارير والبيانات إلى Excel و PDF بضغطة زر. مشاركة التقارير بسهولة مع الشركاء.</p>
+        <span class="feat-tag" style="background:rgba(245,158,11,0.08);color:var(--accent)">تصدير</span>
+      </div>
+      <div class="feat-card" style="--grad:var(--success)">
+        <div class="f-icon" style="background:rgba(16,185,129,0.08);color:var(--success)"><i class="fas fa-headset"></i></div>
+        <h4>دعم فني متميز</h4>
+        <p>فريق دعم فني متخصص جاهز لمساعدتك على مدار الساعة عبر واتساب والبريد الإلكتروني والهاتف.</p>
+        <span class="feat-tag" style="background:rgba(16,185,129,0.08);color:var(--success)">دعم</span>
+      </div>
+    </div>
+
+    <div style="text-align:center;">
+      <a href="{{ url_for('signup') }}" class="btn-back"><i class="fas fa-user-plus"></i> ابدأ الآن مجاناً</a>
+    </div>
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>الشروط والأحكام - Mazad Plus</title>
+  <link rel="icon" href="{{ url_for('static', filename='favicon.png') }}">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --primary-dark: #4338ca;
+      --bg-main: #f5f6fa;
+      --text-dark: #0f172a;
+      --text-muted: #64748b;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Cairo', sans-serif;
+      background: var(--bg-main);
+      margin: 0;
+      padding: 0;
+      direction: rtl;
+      overflow-x: hidden;
+    }
+    .page-nav {
+      background: white;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 14px 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .page-nav .container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .page-nav a {
+      text-decoration: none;
+      color: var(--text-dark);
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: color 0.3s;
+    }
+    .page-nav a:hover { color: var(--primary); }
+    .page-nav img { height: 48px; width: auto; }
+
+    .page-wrap {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 40px 16px 60px;
+    }
+    .page-card {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+      border: 1px solid #f1f5f9;
+      overflow: hidden;
+    }
+    .page-hero {
+      background: linear-gradient(135deg, #0f172a, #334155);
+      padding: 40px;
+      text-align: center;
+      color: white;
+    }
+    .page-hero .icon { font-size: 48px; margin-bottom: 12px; }
+    .page-hero h1 { font-size: 28px; font-weight: 800; margin-bottom: 6px; }
+    .page-hero p { opacity: 0.75; font-size: 14px; margin: 0; }
+    .page-body { padding: 36px; }
+    .page-body h3 {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin: 28px 0 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .page-body h3:first-child { margin-top: 0; }
+    .page-body h3 i { color: var(--primary); font-size: 16px; }
+    .page-body p {
+      font-size: 15px;
+      color: var(--text-muted);
+      line-height: 1.8;
+      margin-bottom: 10px;
+    }
+    .page-body ul {
+      padding-right: 20px;
+      margin-bottom: 10px;
+    }
+    .page-body ul li {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      line-height: 1.7;
+    }
+    .page-body ul li i {
+      color: var(--primary);
+      margin-left: 6px;
+    }
+    .last-updated {
+      text-align: center;
+      padding: 16px;
+      background: #f8f9fc;
+      border-top: 1px solid #f1f5f9;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .btn-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--primary);
+      color: white;
+      padding: 10px 24px;
+      border-radius: 10px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.3s;
+    }
+    .btn-back:hover {
+      background: var(--primary-dark);
+      color: white;
+      transform: translateY(-1px);
+    }
+    @media (max-width: 767px) {
+      .page-hero { padding: 24px; }
+      .page-hero h1 { font-size: 22px; }
+      .page-body { padding: 20px; }
+      .page-body p { font-size: 14px; }
+    }
+    @media (max-width: 575px) {
+      .page-hero { padding: 20px; }
+      .page-hero h1 { font-size: 18px; }
+      .page-body { padding: 16px; }
+      .page-nav img { height: 36px; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="page-nav">
+    <div class="container">
+      <a href="{{ url_for('landing') }}"><i class="fas fa-arrow-right"></i> العودة للرئيسية</a>
+      <a href="{{ url_for('landing') }}"><img src="{{ url_for('static', filename='assets/images/logo.png') }}" alt="Mazad Plus"></a>
+    </div>
+  </nav>
+
+  <div class="page-wrap">
+    <div class="page-card">
+      <div class="page-hero">
+        <div class="icon"><i class="fas fa-file-contract"></i></div>
+        <h1>الشروط والأحكام</h1>
+        <p>آخر تحديث: 1 يناير 2026</p>
+      </div>
+      <div class="page-body">
+        <h3><i class="fas fa-info-circle"></i> قبول الشروط</h3>
+        <p>باستخدامك لنظام Mazad Plus، فإنك توافق على الالتزام بالشروط والأحكام التالية. إذا كنت لا توافق على أي من هذه الشروط، يرجى عدم استخدام النظام.</p>
+
+        <h3><i class="fas fa-file-signature"></i> وصف الخدمة</h3>
+        <p>Mazad Plus هو نظام إدارة محلات متكامل يقدم مجموعة من الأدوات والخدمات لإدارة الفروع، المخازن، المبيعات، المشتريات، والعملاء. نحتفظ بالحق في تحديث أو تعديل الخدمات في أي وقت.</p>
+
+        <h3><i class="fas fa-user-plus"></i> التسجيل وإنشاء الحساب</h3>
+        <ul>
+          <li><i class="fas fa-check"></i> يجب أن تقدم معلومات دقيقة وكاملة عند إنشاء حسابك</li>
+          <li><i class="fas fa-check"></i> أنت المسؤول الوحيد عن الحفاظ على سرية بيانات الدخول الخاصة بك</li>
+          <li><i class="fas fa-check"></i> يجب إبلاغنا فوراً بأي استخدام غير مصرح به لحسابك</li>
+          <li><i class="fas fa-check"></i> نحتفظ بالحق في رفض أي طلب تسجيل أو إلغاء أي حساب دون إبداء أسباب</li>
+        </ul>
+
+        <h3><i class="fas fa-credit-card"></i> الاشتراكات والدفع</h3>
+        <ul>
+          <li><i class="fas fa-check"></i> الخطط الأساسية مجانية مع ميزات محدودة</li>
+          <li><i class="fas fa-check"></i> الخطط المدفوعة توفر ميزات إضافية وفقاً للأسعار المعلنة</li>
+          <li><i class="fas fa-check"></i> الاشتراكات تتجدد تلقائياً ما لم يتم إلغاؤها قبل تاريخ التجديد</li>
+          <li><i class="fas fa-check"></i> لا يتم استرداد المبالغ المدفوعة جزئياً في حالة إلغاء الاشتراك قبل انتهاء مدته</li>
+        </ul>
+
+        <h3><i class="fas fa-exclamation-triangle"></i> الاستخدام المسموح</h3>
+        <p>توافق على استخدام النظام فقط للأغراض المشروعة ووفقاً للقوانين المعمول بها. يمنع:</p>
+        <ul>
+          <li><i class="fas fa-times"></i> استخدام النظام لأي نشاط غير قانوني</li>
+          <li><i class="fas fa-times"></i> محاولة اختراق النظام أو تعطيله</li>
+          <li><i class="fas fa-times"></i> نسخ أو توزيع أو بيع أي جزء من النظام دون إذن كتابي</li>
+          <li><i class="fas fa-times"></i> تحميل ملفات ضارة أو فيروسات</li>
+        </ul>
+
+        <h3><i class="fas fa-balance-scale"></i> الملكية الفكرية</h3>
+        <p>جميع الحقوق الفكرية والمحتوى والتصميم والكود المصدري للنظام هي ملك حصري لـ Mazad Plus. لا يجوز استخدام أي جزء من النظام دون الحصول على إذن كتابي صريح.</p>
+
+        <h3><i class="fas fa-ban"></i> إلغاء الخدمة</h3>
+        <p>نحتفظ بالحق في تعليق أو إلغاء حسابك في الحالات التالية:</p>
+        <ul>
+          <li><i class="fas fa-check"></i> انتهاك شروط الاستخدام</li>
+          <li><i class="fas fa-check"></i> عدم سداد رسوم الاشتراك في موعدها</li>
+          <li><i class="fas fa-check"></i> تقديم معلومات غير صحيحة</li>
+          <li><i class="fas fa-check"></i> انتهاء صلاحية الاشتراك دون تجديد</li>
+        </ul>
+
+        <h3><i class="fas fa-handshake"></i> إخلاء المسؤولية</h3>
+        <p>يقدم النظام "كما هو" دون أي ضمانات صريحة أو ضمنية. نحن غير مسؤولين عن أي أضرار مباشرة أو غير مباشرة ناتجة عن استخدام النظام.</p>
+
+        <h3><i class="fas fa-sync-alt"></i> تعديل الشروط</h3>
+        <p>نحتفظ بالحق في تعديل هذه الشروط في أي وقت. سيتم إعلام المستخدمين بالتغييرات عبر البريد الإلكتروني أو من خلال إشعار في النظام. استمرار استخدام النظام بعد التعديل يعني موافقتك على الشروط المعدلة.</p>
+
+        <h3><i class="fas fa-envelope"></i> التواصل</h3>
+        <p>للاستفسارات بخصوص هذه الشروط، يرجى التواصل عبر: <strong>support@mazadplus.com</strong></p>
+
+        <div style="text-align:center;margin-top:28px;">
+          <a href="{{ url_for('landing') }}" class="btn-back"><i class="fas fa-arrow-right"></i> العودة للرئيسية</a>
+        </div>
+      </div>
+      <div class="last-updated">
+        <i class="fas fa-clock"></i> آخر تحديث: 1 يناير 2026
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

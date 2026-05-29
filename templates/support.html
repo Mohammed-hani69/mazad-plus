@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>الدعم الفني - Mazad Plus</title>
+  <link rel="icon" href="{{ url_for('static', filename='favicon.png') }}">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Cairo', sans-serif; background: #f0f2f5; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+    .support-card { background: white; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); padding: 50px 40px; text-align: center; max-width: 520px; width: 90%; }
+    .support-icon { width: 90px; height: 90px; background: var(--primary-bg, #eef2ff); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; }
+    .support-icon i { font-size: 42px; color: var(--primary, #4f46e5); }
+    h2 { font-weight: 800; font-size: 24px; color: #1e293b; margin-bottom: 6px; }
+    .subtitle { color: #64748b; font-size: 14px; margin-bottom: 30px; }
+    .contact-list { display: flex; flex-direction: column; gap: 14px; margin-bottom: 30px; }
+    .contact-item { display: flex; align-items: center; gap: 14px; background: #f8fafc; padding: 14px 18px; border-radius: 12px; text-align: right; }
+    .contact-item .icon-circle { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .contact-item .icon-circle i { font-size: 18px; }
+    .contact-item .contact-text { flex: 1; }
+    .contact-item .contact-text .label { font-size: 12px; color: #94a3b8; }
+    .contact-item .contact-text .value { font-size: 15px; font-weight: 700; color: #1e293b; direction: ltr; }
+    .contact-item .contact-text .value.ar { direction: rtl; }
+    .btn-back { display: inline-flex; align-items: center; gap: 8px; background: var(--primary, #4f46e5); color: white; padding: 12px 28px; border-radius: 10px; font-weight: 700; text-decoration: none; transition: all 0.3s; }
+    .btn-back:hover { background: #4338ca; transform: translateY(-2px); color: white; }
+    @media (max-width: 767px) { .support-card { padding: 30px 20px; } h2 { font-size: 20px; } .contact-item { padding: 12px 14px; } .contact-item .contact-text .value { font-size: 13px; } }
+    @media (max-width: 575px) { .support-card { padding: 24px 16px; } .support-icon { width: 64px; height: 64px; } .support-icon i { font-size: 30px; } h2 { font-size: 18px; } .subtitle { font-size: 13px; } .btn-back { width: 100%; justify-content: center; } }
+  </style>
+</head>
+<body>
+  <div class="support-card">
+    <div class="support-icon"><i class="fas fa-headset"></i></div>
+    <h2>الدعم الفني</h2>
+    <p class="subtitle">نحن هنا لمساعدتك. تواصل معنا عبر أي من الوسائل التالية:</p>
+    <div class="contact-list">
+      <div class="contact-item">
+        <div class="icon-circle" style="background:#eef2ff;color:var(--primary);"><i class="fab fa-whatsapp"></i></div>
+        <div class="contact-text">
+          <div class="label">واتساب</div>
+          <div class="value"><a href="https://wa.me/201234567890" target="_blank" style="color:#1e293b;text-decoration:none;">+20 123 456 7890</a></div>
+        </div>
+      </div>
+      <div class="contact-item">
+        <div class="icon-circle" style="background:#fef2f2;color:#ef4444;"><i class="fas fa-envelope"></i></div>
+        <div class="contact-text">
+          <div class="label">البريد الإلكتروني</div>
+          <div class="value ar"><a href="mailto:support@mazadplus.com" style="color:#1e293b;text-decoration:none;">support@mazadplus.com</a></div>
+        </div>
+      </div>
+      <div class="contact-item">
+        <div class="icon-circle" style="background:#fffbeb;color:#d97706;"><i class="fas fa-phone"></i></div>
+        <div class="contact-text">
+          <div class="label">الهاتف</div>
+          <div class="value">+20 123 456 7890</div>
+        </div>
+      </div>
+    </div>
+    <a href="javascript:history.back()" class="btn-back"><i class="fas fa-arrow-right"></i> العودة</a>
+  </div>
+</body>
+</html>

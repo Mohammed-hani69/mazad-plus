@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>الاشتراك منتهي - Mazad Plus</title>
+  <link rel="icon" href="{{ url_for('static', filename='favicon.png') }}">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Cairo', sans-serif; background: #f0f2f5; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+    .lock-card { background: white; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); padding: 60px 40px; text-align: center; max-width: 500px; width: 90%; }
+    .lock-icon { width: 100px; height: 100px; background: #fef2f2; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; }
+    .lock-icon i { font-size: 48px; color: #ef4444; }
+    h2 { font-weight: 800; font-size: 24px; color: #1e293b; margin-bottom: 8px; }
+    p { color: #64748b; font-size: 15px; margin-bottom: 24px; line-height: 1.7; }
+    .plan-name { background: #f1f5f9; border-radius: 10px; padding: 12px; margin-bottom: 20px; font-size: 14px; }
+    .plan-name strong { color: var(--primary, #4f46e5); }
+    .btn-renew { background: var(--primary, #4f46e5); color: white; border: none; padding: 14px 32px; border-radius: 10px; font-weight: 700; font-size: 16px; transition: all 0.3s; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
+    .btn-renew:hover { background: #4338ca; transform: translateY(-2px); box-shadow: 0 4px 15px rgba(79,70,229,0.3); color: white; }
+    .btn-support { display: inline-flex; align-items: center; gap: 8px; color: var(--primary, #4f46e5); text-decoration: none; font-weight: 600; margin-top: 16px; padding: 10px 24px; border-radius: 8px; border: 2px solid var(--primary, #4f46e5); transition: all 0.3s; }
+    .btn-support:hover { background: var(--primary, #4f46e5); color: white; }
+    .expired-badge { display: inline-block; background: #fef2f2; color: #ef4444; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; margin-bottom: 16px; }
+    @media (max-width: 767px) { .lock-card { padding: 40px 24px; } h2 { font-size: 20px; } }
+    @media (max-width: 575px) { .lock-card { padding: 28px 16px; } .lock-icon { width: 72px; height: 72px; } .lock-icon i { font-size: 36px; } h2 { font-size: 18px; } p { font-size: 14px; } .btn-renew { width: 100%; justify-content: center; } .btn-support { width: 100%; justify-content: center; } }
+  </style>
+</head>
+<body>
+  <div class="lock-card">
+    <div class="lock-icon"><i class="fas fa-lock"></i></div>
+    <div class="expired-badge"><i class="fas fa-exclamation-circle"></i> الاشتراك منتهي</div>
+    <h2>تم انتهاء اشتراكك</h2>
+    <p>لم يعد بإمكانك الوصول إلى النظام. يرجى تجديد الاشتراك لاستعادة جميع الميزات والخدمات.</p>
+    {% if sub and sub.plan %}
+    <div class="plan-name">
+      <i class="fas fa-box"></i> باقتك الحالية: <strong>{{ sub.plan.name }}</strong>
+    </div>
+    {% endif %}
+    <p style="font-size:13px;color:#94a3b8;">
+      للاستفسار أو التجديد، يرجى التواصل مع فريق الدعم الفني.
+    </p>
+    <div style="display:flex;flex-direction:column;gap:12px;align-items:center;">
+      <a href="{{ url_for('support') }}" class="btn-support"><i class="fas fa-headset"></i> تواصل مع الدعم الفني</a>
+      <a href="{{ url_for('logout') }}" style="color:#94a3b8;font-size:13px;text-decoration:none;"><i class="fas fa-sign-out-alt"></i> تسجيل الخروج</a>
+    </div>
+  </div>
+</body>
+</html>

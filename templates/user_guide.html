@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>دليل الاستخدام - Mazad Plus</title>
+  <link rel="icon" href="{{ url_for('static', filename='favicon.png') }}">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    .guide-wrapper { max-width: 900px; margin: 0 auto; }
+    .guide-hero { background: linear-gradient(135deg, #4f46e5, #6366f1); color: white; padding: 40px; border-radius: 16px; margin-bottom: 30px; text-align: center; }
+    .guide-hero h1 { font-size: 28px; font-weight: 900; margin-bottom: 8px; }
+    .guide-hero p { opacity: 0.9; font-size: 15px; }
+    .guide-section { background: white; border-radius: 12px; border: 1px solid var(--border-color); box-shadow: var(--shadow-card); margin-bottom: 20px; overflow: hidden; }
+    .guide-section-header { padding: 16px 24px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; gap: 10px; cursor: pointer; }
+    .guide-section-header h3 { font-size: 16px; font-weight: 700; margin: 0; flex: 1; }
+    .guide-section-header .sec-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; color: white; }
+    .guide-section-body { padding: 20px 24px; }
+    .guide-step { display: flex; gap: 14px; padding: 12px 0; border-bottom: 1px solid var(--border-light); }
+    .guide-step:last-child { border-bottom: none; }
+    .step-num { width: 28px; height: 28px; border-radius: 50%; background: var(--primary-bg); color: var(--primary); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; flex-shrink: 0; }
+    .step-content { flex: 1; }
+    .step-content strong { font-size: 14px; display: block; margin-bottom: 2px; }
+    .step-content p { font-size: 13px; color: var(--text-secondary); margin: 0; }
+    .step-content ul { margin: 4px 0 0; padding-right: 18px; font-size: 13px; color: var(--text-secondary); }
+    .badge-flow { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; margin: 0 2px; }
+    .badge-flow.primary { background: #eef2ff; color: #4f46e5; }
+    .badge-flow.success { background: #ecfdf5; color: #10b981; }
+    .badge-flow.warning { background: #fffbeb; color: #d97706; }
+    .badge-flow.danger { background: #fef2f2; color: #ef4444; }
+    .flow-arrow { color: var(--text-muted); margin: 0 4px; font-size: 12px; }
+    .toc-list { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 8px; }
+    .toc-list li a { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: #f8f9fc; border-radius: 8px; color: var(--text-primary); text-decoration: none; font-size: 13px; font-weight: 500; }
+    .toc-list li a:hover { background: var(--primary-bg); color: var(--primary); }
+    @media (max-width: 767px) { .guide-hero { padding: 24px 16px; } .guide-hero h1 { font-size: 22px; } .guide-section-body { padding: 16px; } }
+  </style>
+</head>
+<body>
+  <div class="dashboard-wrapper">
+    {% include 'sidebar.html' %}
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <main class="main-content" id="mainContent">
+      {% include 'navbar.html' %}
+      <div class="page-content">
+        <div class="guide-wrapper">
+
+          <div class="guide-hero">
+            <h1><i class="fas fa-book-open" style="margin-left:10px;"></i> دليل استخدام نظام Mazad Plus</h1>
+            <p>دليل شامل من الألف إلى الياء لكيفية استخدام النظام وإدارة متجرك بكفاءة</p>
+          </div>
+
+          <!-- Table of Contents -->
+          <div class="guide-section">
+            <div class="guide-section-body">
+              <ul class="toc-list">
+                <li><a href="#intro"><i class="fas fa-info-circle" style="color:#4f46e5;"></i> مقدمة عن النظام</a></li>
+                <li><a href="#start"><i class="fas fa-rocket" style="color:#10b981;"></i> البدء مع النظام</a></li>
+                <li><a href="#basics"><i class="fas fa-database" style="color:#f59e0b;"></i> البيانات الأساسية</a></li>
+                <li><a href="#parties"><i class="fas fa-handshake" style="color:#8b5cf6;"></i> العملاء والموردين</a></li>
+                <li><a href="#transactions"><i class="fas fa-exchange-alt" style="color:#06b6d4;"></i> العمليات اليومية</a></li>
+                <li><a href="#finance"><i class="fas fa-coins" style="color:#ef4444;"></i> الإدارة المالية</a></li>
+                <li><a href="#invoices"><i class="fas fa-print" style="color:#f97316;"></i> الفواتير والطباعة</a></li>
+                <li><a href="#dashboard"><i class="fas fa-chart-pie" style="color:#6366f1;"></i> لوحة التحكم</a></li>
+                <li><a href="#tips"><i class="fas fa-lightbulb" style="color:#10b981;"></i> نصائح وإرشادات</a></li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Section: Introduction -->
+          <div class="guide-section" id="intro">
+            <div class="guide-section-header">
+              <span class="sec-icon" style="background:#4f46e5;"><i class="fas fa-info-circle"></i></span>
+              <h3>مقدمة عن النظام</h3>
+            </div>
+            <div class="guide-section-body">
+              <p style="font-size:14px;color:var(--text-secondary);margin-bottom:12px;">
+                <strong>Mazad Plus</strong> هو نظام متكامل لإدارة المتاجر والمخازن، يتيح لك إدارة المبيعات والمشتريات والمخزون والعملاء والموردين والمصروفات والسندات، مع تقارير وتحليلات دقيقة ودعم كامل للفواتير القابلة للطباعة.
+              </p>
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-top:12px;">
+                <div style="background:#f8f9fc;padding:12px;border-radius:8px;text-align:center;">
+                  <i class="fas fa-users" style="font-size:22px;color:#4f46e5;display:block;margin-bottom:4px;"></i>
+                  <strong style="font-size:13px;">إدارة الأطراف</strong>
+                  <small style="display:block;color:var(--text-muted);font-size:11px;">عملاء - موردين</small>
+                </div>
+                <div style="background:#f8f9fc;padding:12px;border-radius:8px;text-align:center;">
+                  <i class="fas fa-shopping-cart" style="font-size:22px;color:#10b981;display:block;margin-bottom:4px;"></i>
+                  <strong style="font-size:13px;">المعاملات</strong>
+                  <small style="display:block;color:var(--text-muted);font-size:11px;">مبيعات - مشتريات</small>
+                </div>
+                <div style="background:#f8f9fc;padding:12px;border-radius:8px;text-align:center;">
+                  <i class="fas fa-cubes" style="font-size:22px;color:#f59e0b;display:block;margin-bottom:4px;"></i>
+                  <strong style="font-size:13px;">المخزون</strong>
+                  <small style="display:block;color:var(--text-muted);font-size:11px;">أصناف - تصنيفات</small>
+                </div>
+                <div style="background:#f8f9fc;padding:12px;border-radius:8px;text-align:center;">
+                  <i class="fas fa-chart-line" style="font-size:22px;color:#ef4444;display:block;margin-bottom:4px;"></i>
+                  <strong style="font-size:13px;">التقارير</strong>
+                  <small style="display:block;color:var(--text-muted);font-size:11px;">تحليلات - أرباح</small>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section: Getting Started -->
+          <div class="guide-section" id="start">
+            <div class="guide-section-header">
+              <span class="sec-icon" style="background:#10b981;"><i class="fas fa-rocket"></i></span>
+              <h3>البدء مع النظام</h3>
+            </div>
+            <div class="guide-section-body">
+              <div class="guide-step">
+                <span class="step-num">1</span>
+                <div class="step-content">
+                  <strong>تسجيل الدخول</strong>
+                  <p>استخدم بريدك الإلكتروني وكلمة المرور للدخول إلى لوحة التحكم. يمكنك التسجيل من صفحة إنشاء حساب جديدة.</p>
+                </div>
+              </div>
+              <div class="guide-step">
+                <span class="step-num">2</span>
+                <div class="step-content">
+                  <strong>إعداد المتجر</strong>
+                  <p>من صفحة <strong>قوالب الفواتير</strong>، قم بتعيين اسم متجرك، العنوان، الهاتف، الرقم الضريبي، العملة، واختيار قالب الفاتورة المناسب.</p>
+                </div>
+              </div>
+              <div class="guide-step">
+                <span class="step-num">3</span>
+                <div class="step-content">
+                  <strong>إضافة البيانات الأساسية</strong>
+                  <p>أضف الفروع، المخازن، التصنيفات، والأصناف. رتب بياناتك قبل البدء في المعاملات.</p>
+                </div>
+              </div>
+              <div class="guide-step">
+                <span class="step-num">4</span>
+                <div class="step-content">
+                  <strong>إضافة الأطراف</strong>
+                  <p>سجل العملاء والموردين الذين ستتعامل معهم في عمليات البيع والشراء.</p>
+                </div>
+              </div>
+              <div class="guide-step">
+                <span class="step-num">5</span>
+                <div class="step-content">
+                  <strong>بدء المعاملات</strong>
+                  <p>أنشئ فواتير المشتريات أولاً لإضافة المخزون، ثم ابدأ بعمليات البيع.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section: Basic Data -->
+          <div class="guide-section" id="basics">
+            <div class="guide-section-header">
+              <span class="sec-icon" style="background:#f59e0b;"><i class="fas fa-database"></i></span>
+              <h3>البيانات الأساسية</h3>
+            </div>
+            <div class="guide-section-body">
+              <div style="display:grid;gap:16px;">
+                <div style="background:#fffbeb;padding:14px;border-radius:10px;">
+                  <strong style="color:#d97706;"><i class="fas fa-code-branch"></i> الفروع</strong>
+                  <p style="font-size:13px;color:var(--text-secondary);margin:4px 0 0;">تستخدم لإدارة مواقع متجرك المختلفة. أضف فروعك (الرئيسي، الإسكندرية، إلخ) مع بيانات المدير المسؤول.</p>
+                </div>
+                <div style="background:#eef2ff;padding:14px;border-radius:10px;">
+                  <strong style="color:#4f46e5;"><i class="fas fa-warehouse"></i> المخازن</strong>
+                  <p style="font-size:13px;color:var(--text-secondary);margin:4px 0 0;">كل مخزن يتبع فرعاً محدداً. أضف مخازن متعددة (مركزي، توزيع، إلخ) لتتبع المخزون بدقة.</p>
+                </div>
+                <div style="background:#ecfdf5;padding:14px;border-radius:10px;">
+                  <strong style="color:#059669;"><i class="fas fa-tags"></i> التصنيفات</strong>
+                  <p style="font-size:13px;color:var(--text-secondary);margin:4px 0 0;">صنف منتجاتك في مجموعات (إلكترونيات، ملابس، مواد غذائية) لتسهيل البحث والتنظيم.</p>
+                </div>
+                <div style="background:#fef2f2;padding:14px;border-radius:10px;">
+                  <strong style="color:#dc2626;"><i class="fas fa-cubes"></i> الأصناف</strong>
+                  <p style="font-size:13px;color:var(--text-secondary);margin:4px 0 0;">أضف كل منتج مع باركود، سعر الشراء، سعر البيع، الكمية، والحد الأدنى للتنبيه عند نفاد المخزون.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section: Parties -->
+          <div class="guide-section" id="parties">
+            <div class="guide-section-header">
+              <span class="sec-icon" style="background:#8b5cf6;"><i class="fas fa-handshake"></i></span>
+              <h3>العملاء والموردين</h3>
+            </div>
+            <div class="guide-section-body">
+              <div class="guide-step">
+                <span class="step-num"><i class="fas fa-user" style="font-size:11px;"></i></span>
+                <div class="step-content">
+                  <strong>العملاء</strong>
+                  <p>سجل بيانات عملائك (الاسم، الهاتف، البريد، العنوان). يمكنك متابعة إجمالي مشترياتهم وأرصدتهم المالية من خلال الصفحة المخصصة.</p>
+                </div>
+              </div>
+              <div class="guide-step">
+                <span class="step-num"><i class="fas fa-truck" style="font-size:11px;"></i></span>
+                <div class="step-content">
+                  <strong>الموردين</strong>
+                  <p>أضف الموردين الذين تتعامل معهم لشراء البضائع. سجل بيانات التواصل الخاصة بهم لتسهيل الطلبات.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section: Daily Transactions -->
+          <div class="guide-section" id="transactions">
+            <div class="guide-section-header">
+              <span class="sec-icon" style="background:#06b6d4;"><i class="fas fa-exchange-alt"></i></span>
+              <h3>العمليات اليومية</h3>
+            </div>
+            <div class="guide-section-body">
+              <div style="margin-bottom:16px;padding:12px;background:#f0fdf4;border-radius:10px;border-right:4px solid #10b981;">
+                <strong style="font-size:14px;color:#059669;">تسلسل العمليات الصحيح:</strong>
+                <div style="margin-top:8px;display:flex;align-items:center;flex-wrap:wrap;gap:4px;">
+                  <span class="badge-flow primary">إضافة تصنيفات</span>
+                  <span class="flow-arrow"><i class="fas fa-arrow-left"></i></span>
+                  <span class="badge-flow primary">إضافة أصناف</span>
+                  <span class="flow-arrow"><i class="fas fa-arrow-left"></i></span>
+                  <span class="badge-flow warning">إضافة موردين</span>
+                  <span class="flow-arrow"><i class="fas fa-arrow-left"></i></span>
+                  <span class="badge-flow success">فاتورة مشتريات</span>
+                  <span class="flow-arrow"><i class="fas fa-arrow-left"></i></span>
+                  <span class="badge-flow primary">إضافة عملاء</span>
+                  <span class="flow-arrow"><i class="fas fa-arrow-left"></i></span>
+                  <span class="badge-flow success">فاتورة مبيعات</span>
+                </div>
+              </div>
+
+              <div class="guide-step">
+                <span class="step-num">1</span>
+                <div class="step-content">
+                  <strong>المشتريات</strong>
+                  <p>عند شراء بضاعة من مورد، أنشئ فاتورة مشتريات جديدة. اختر المورد والمخزن، أضف الأصناف والكميات والأسعار. النظام سيحدّث المخزون تلقائياً.</p>
+                  <ul>
+                    <li>اذهب إلى <strong>المشتريات ← إضافة فاتورة</strong></li>
+                    <li>اختر المورد والمخزن</li>
+                    <li>أضف الأصناف (كمية، سعر الشراء)</li>
+                    <li>أدخل المبلغ المدفوع (قد يكون جزءاً أو كاملاً)</li>
+                    <li>احفظ الفاتورة - سيتم زيادة المخزون تلقائياً</li>
+                  </ul>
+                </div>
+              </div>
+              <div class="guide-step">
+                <span class="step-num">2</span>
+                <div class="step-content">
+                  <strong>المبيعات</strong>
+                  <p>عند بيع بضاعة لعميل، أنشئ فاتورة مبيعات. اختر العميل والمخزن، أضف الأصناف المباعة. يمكن إضافة خصم على الفاتورة.</p>
+                  <ul>
+                    <li>اذهب إلى <strong>المبيعات ← إضافة فاتورة</strong></li>
+                    <li>اختر العميل والمخزن</li>
+                    <li>أضف الأصناف (كمية، سعر البيع)</li>
+                    <li>أدخل الخصم (إن وجد) والمبلغ المدفوع</li>
+                    <li>احفظ الفاتورة - سيتم خفض المخزون تلقائياً</li>
+                  </ul>
+                </div>
+              </div>
+              <div class="guide-step">
+                <span class="step-num">3</span>
+                <div class="step-content">
+                  <strong>المرتجعات</strong>
+                  <p>عند إرجاع بضاعة من عميل، أنشئ مرتجعاً مرتبطاً بفاتورة المبيعات الأصلية. سيتم إعادة البضاعة إلى المخزون.</p>
+                  <ul>
+                    <li>اذهب إلى <strong>المرتجعات ← إضافة مرتجع</strong></li>
+                    <li>اختر فاتورة المبيعات المرتبطة</li>
+                    <li>اختر الأصناف المرتجعة والكميات</li>
+                    <li>حدد سبب الإرجاع</li>
+                    <li>احفظ - سيتم إعادة المخزون تلقائياً</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section: Financial Management -->
+          <div class="guide-section" id="finance">
+            <div class="guide-section-header">
+              <span class="sec-icon" style="background:#ef4444;"><i class="fas fa-coins"></i></span>
+              <h3>الإدارة المالية</h3>
+            </div>
+            <div class="guide-section-body">
+              <div class="guide-step">
+                <span class="step-num"><i class="fas fa-money-bill" style="font-size:11px;"></i></span>
+                <div class="step-content">
+                  <strong>المصروفات</strong>
+                  <p>سجل جميع مصروفاتك اليومية (إيجار، كهرباء، رواتب، صيانة). اختر التصنيف والفرع المرتبط بالمصروف.</p>
+                </div>
+              </div>
+              <div class="guide-step">
+                <span class="step-num"><i class="fas fa-file-invoice" style="font-size:11px;"></i></span>
+                <div class="step-content">
+                  <strong>السندات</strong>
+                  <p>نوعان: <span class="badge-flow success">سند قبض</span> (تحصيل من عميل) و <span class="badge-flow danger">سند صرف</span> (دفع لمورد). يستخدم لتسوية الحسابات.</p>
+                </div>
+              </div>
+              <div style="margin-top:12px;padding:12px;background:#f8f9fc;border-radius:8px;">
+                <strong style="font-size:13px;color:var(--text-secondary);"><i class="fas fa-calculator"></i> كيف يحسب الربح؟</strong>
+                <p style="font-size:13px;color:var(--text-muted);margin:4px 0 0;">
+                  صافي الربح = إجمالي المبيعات - إجمالي المشتريات - إجمالي المصروفات
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section: Invoices -->
+          <div class="guide-section" id="invoices">
+            <div class="guide-section-header">
+              <span class="sec-icon" style="background:#f97316;"><i class="fas fa-print"></i></span>
+              <h3>الفواتير والطباعة</h3>
+            </div>
+            <div class="guide-section-body">
+              <div class="guide-step">
+                <span class="step-num"><i class="fas fa-cog" style="font-size:11px;"></i></span>
+                <div class="step-content">
+                  <strong>إعدادات الفواتير</strong>
+                  <p>من صفحة <strong>قوالب الفواتير</strong>، يمكنك:</p>
+                  <ul>
+                    <li>تحديد اسم وعنوان ورقم هاتف المتجر</li>
+                    <li>إدخال الرقم الضريبي</li>
+                    <li>اختيار العملة (ج.م، $، إلخ)</li>
+                    <li>اختيار قالب الفاتورة المناسب (كلاسيك، عصري، احترافي)</li>
+                    <li>إضافة تذييل للفاتورة (شكر، ملاحظات)</li>
+                  </ul>
+                </div>
+              </div>
+              <div class="guide-step">
+                <span class="step-num"><i class="fas fa-file" style="font-size:11px;"></i></span>
+                <div class="step-content">
+                  <strong>قوالب الفواتير</strong>
+                  <p>النظام يوفر 3 تصاميم مختلفة للفواتير:</p>
+                  <ul>
+                    <li><strong>قالب كلاسيك</strong> - تصميم بنفسجي تقليدي مناسب لجميع المتاجر</li>
+                    <li><strong>قالب عصري</strong> - تصميم أخضر عصري مع بطاقات منفصلة</li>
+                    <li><strong>قالب احترافي</strong> - فاتورة ضريبية متكاملة مع ختم مائي وتوقيع</li>
+                  </ul>
+                </div>
+              </div>
+              <div class="guide-step">
+                <span class="step-num"><i class="fas fa-print" style="font-size:11px;"></i></span>
+                <div class="step-content">
+                  <strong>طباعة الفاتورة</strong>
+                  <p>من صفحة عرض الفاتورة (مبيعات أو مشتريات)، انقر على زر <span class="badge-flow success">طباعة</span> واختر القالب المفضل. ستفتح الفاتورة في نافذة جديدة جاهزة للطباعة.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section: Dashboard -->
+          <div class="guide-section" id="dashboard">
+            <div class="guide-section-header">
+              <span class="sec-icon" style="background:#6366f1;"><i class="fas fa-chart-pie"></i></span>
+              <h3>لوحة التحكم</h3>
+            </div>
+            <div class="guide-section-body">
+              <p style="font-size:13px;color:var(--text-secondary);margin-bottom:12px;">
+                لوحة التحكم هي شاشة العرض الرئيسية التي تظهر لك نظرة شاملة على أداء متجرك:
+              </p>
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;">
+                <div style="background:#f8f9fc;padding:12px;border-radius:8px;">
+                  <i class="fas fa-credit-card" style="color:#4f46e5;"></i>
+                  <strong style="display:block;font-size:13px;">بطاقات الإحصائيات</strong>
+                  <small style="color:var(--text-muted);font-size:11px;">عدد العملاء، المبيعات، المشتريات، الأرباح، الأصناف</small>
+                </div>
+                <div style="background:#f8f9fc;padding:12px;border-radius:8px;">
+                  <i class="fas fa-chart-bar" style="color:#10b981;"></i>
+                  <strong style="display:block;font-size:13px;">التحليل الشهري</strong>
+                  <small style="color:var(--text-muted);font-size:11px;">مخطط يظهر مقارنة المبيعات والمشتريات شهرياً</small>
+                </div>
+                <div style="background:#f8f9fc;padding:12px;border-radius:8px;">
+                  <i class="fas fa-trophy" style="color:#f59e0b;"></i>
+                  <strong style="display:block;font-size:13px;">أفضل الأصناف</strong>
+                  <small style="color:var(--text-muted);font-size:11px;">قائمة بأكثر الأصناف مبيعاً حسب الكمية والإيرادات</small>
+                </div>
+                <div style="background:#f8f9fc;padding:12px;border-radius:8px;">
+                  <i class="fas fa-clock" style="color:#8b5cf6;"></i>
+                  <strong style="display:block;font-size:13px;">آخر المعاملات</strong>
+                  <small style="color:var(--text-muted);font-size:11px;">أحدث 5 مبيعات ومشتريات مع روابط سريعة</small>
+                </div>
+                <div style="background:#f8f9fc;padding:12px;border-radius:8px;">
+                  <i class="fas fa-exclamation-triangle" style="color:#ef4444;"></i>
+                  <strong style="display:block;font-size:13px;">تنبيهات المخزون</strong>
+                  <small style="color:var(--text-muted);font-size:11px;">إشعارات بالأصناف المنخفضة أو النافدة من المخزون</small>
+                </div>
+                <div style="background:#f8f9fc;padding:12px;border-radius:8px;">
+                  <i class="fas fa-file-invoice" style="color:#f97316;"></i>
+                  <strong style="display:block;font-size:13px;">جدول التحليل المالي</strong>
+                  <small style="color:var(--text-muted);font-size:11px;">تفصيل المبيعات والمشتريات والمصروفات والأرباح شهرياً</small>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section: Tips -->
+          <div class="guide-section" id="tips">
+            <div class="guide-section-header">
+              <span class="sec-icon" style="background:#10b981;"><i class="fas fa-lightbulb"></i></span>
+              <h3>نصائح وإرشادات</h3>
+            </div>
+            <div class="guide-section-body">
+              <div style="display:grid;gap:10px;">
+                <div style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--border-light);">
+                  <i class="fas fa-check-circle" style="color:#10b981;margin-top:2px;"></i>
+                  <div><strong style="font-size:13px;">رتب بياناتك أولاً</strong><p style="font-size:12px;color:var(--text-muted);margin:0;">أضف التصنيفات ← الأصناف ← الفروع ← المخازن قبل بدء المعاملات</p></div>
+                </div>
+                <div style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--border-light);">
+                  <i class="fas fa-check-circle" style="color:#10b981;margin-top:2px;"></i>
+                  <div><strong style="font-size:13px;">سجل المشتريات أولاً</strong><p style="font-size:12px;color:var(--text-muted);margin:0;">لضمان دقة المخزون، أضف فواتير المشتريات قبل المبيعات</p></div>
+                </div>
+                <div style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--border-light);">
+                  <i class="fas fa-check-circle" style="color:#10b981;margin-top:2px;"></i>
+                  <div><strong style="font-size:13px;">استخدم البحث</strong><p style="font-size:12px;color:var(--text-muted);margin:0;">يمكنك البحث في القائمة الجانبية (السايدبار) للوصول السريع لأي صفحة</p></div>
+                </div>
+                <div style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--border-light);">
+                  <i class="fas fa-check-circle" style="color:#10b981;margin-top:2px;"></i>
+                  <div><strong style="font-size:13px;">اختصارات لوحة المفاتيح</strong><p style="font-size:12px;color:var(--text-muted);margin:0;">Ctrl+B لفتح/إغلاق القائمة الجانبية، / للبحث السريع</p></div>
+                </div>
+                <div style="display:flex;gap:10px;padding:8px 0;">
+                  <i class="fas fa-check-circle" style="color:#10b981;margin-top:2px;"></i>
+                  <div><strong style="font-size:13px;">النسخ الاحتياطي</strong><p style="font-size:12px;color:var(--text-muted);margin:0;">احتفظ بنسخة احتياطية من قاعدة البيانات (ملف mazad_plus.db) بشكل دوري</p></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      {% include 'footer.html' %}
+    </main>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
