@@ -2,7 +2,7 @@ import json as json_module
 from datetime import datetime, date, timedelta
 from functools import wraps
 
-from flask import Blueprint, request, jsonify, current_app, url_for
+from flask import Blueprint, redirect, request, jsonify, current_app, url_for
 from flask_login import current_user, login_user
 from itsdangerous import URLSafeTimedSerializer as Serializer
 from sqlalchemy import desc
@@ -1536,12 +1536,14 @@ def api_google_auth_url():
     return json_success({'redirect_url': redirect.headers.get('Location', ''), 'state': state})
 
 
-@api.route('/auth/google/callback', methods=['POST'])
+@api.route('/auth/google/callback', methods=['GET', 'POST'])
 def api_google_callback():
     from authlib.integrations.flask_client import OAuth
-    data = _SafeData(request.get_json() or request.form)
-    code = data.get('code', '')
-    state = data.get('state', '')
+    from urllib.parse import urlencode
+    import json as json_lib
+    is_get = request.method == 'GET'
+    code = request.args.get('code', '') if is_get else _SafeData(request.get_json() or request.form).get('code', '')
+    state = request.args.get('state', '') if is_get else _SafeData(request.get_json() or request.form).get('state', '')
     if not code:
         return json_error('رمز التفويض مطلوب')
     redirect_uri = url_for('api.api_google_callback', _external=True)
@@ -1558,7 +1560,7 @@ def api_google_callback():
         server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
     )
     try:
-        token = oauth.google.authorize_access_token(code=code, state=state)
+        atoken = oauth.google.authorize_access_token(code=code, state=state)
         userinfo = oauth.google.get('https://www.googleapis.com/oauth2/v3/userinfo').json()
         google_id = userinfo.get('sub')
         email = userinfo.get('email', '').lower()
@@ -1599,9 +1601,14 @@ def api_google_callback():
         db.session.commit()
         api_token = generate_token(user.id)
         login_user(user)
+        if is_get:
+            params = urlencode({'token': api_token, 'user': json_lib.dumps({'id': user.id, 'full_name': user.full_name, 'email': user.email, 'role': user.role})})
+            return redirect(f'mazadplus://auth?{params}')
         return json_success({'token': api_token, 'user': {'id': user.id, 'full_name': user.full_name, 'email': user.email, 'role': user.role}})
     except Exception as e:
         current_app.logger.error(f'Google auth error: {e}')
+        if is_get:
+            return redirect(f'mazadplus://auth?error=فشل+تسجيل+الدخول')
         return json_error('فشل تسجيل الدخول عبر Google', 500)
 
 
