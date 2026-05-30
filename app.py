@@ -457,12 +457,7 @@ def auth_google():
         name='google',
         client_id=google_client_id,
         client_secret=google_client_secret,
-        access_token_url='https://accounts.google.com/o/oauth2/token',
-        access_token_params=None,
-        authorize_url='https://accounts.google.com/o/oauth2/auth',
-        authorize_params=None,
-        api_base_url='https://www.googleapis.com/oauth2/v1/',
-        userinfo_endpoint='https://www.googleapis.com/oauth2/v3/userinfo',
+        server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
         client_kwargs={'scope': 'openid email profile'},
     )
     return oauth.google.authorize_redirect(redirect_uri)
@@ -481,12 +476,7 @@ def auth_google_callback():
         name='google',
         client_id=google_client_id,
         client_secret=google_client_secret,
-        access_token_url='https://accounts.google.com/o/oauth2/token',
-        access_token_params=None,
-        authorize_url='https://accounts.google.com/o/oauth2/auth',
-        authorize_params=None,
-        api_base_url='https://www.googleapis.com/oauth2/v1/',
-        userinfo_endpoint='https://www.googleapis.com/oauth2/v3/userinfo',
+        server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
         client_kwargs={'scope': 'openid email profile'},
     )
     try:
