@@ -451,7 +451,7 @@ def auth_google():
     if not google_client_id or not google_client_secret:
         flash('تسجيل الدخول عبر Google غير مفعل حالياً', 'warning')
         return redirect(url_for('login'))
-    redirect_uri = url_for('auth_google_callback', _external=True)
+    redirect_uri = current_app.config.get('GOOGLE_REDIRECT_URI', url_for('auth_google_callback', _external=True))
     oauth = OAuth(current_app)
     oauth.register(
         name='google',
