@@ -1533,8 +1533,8 @@ def api_google_auth_url():
         server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
     )
     result = oauth.google.create_authorization_url(redirect_uri)
-    auth_url = result[0]
-    state = result[1]
+    auth_url = result.get('url') or result.get('authorization_url')
+    state = result.get('state')
     return json_success({'redirect_url': auth_url, 'state': state})
 
 
