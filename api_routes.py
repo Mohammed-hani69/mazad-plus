@@ -1532,8 +1532,8 @@ def api_google_auth_url():
         client_kwargs={'scope': 'openid email profile'},
         server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
     )
-    redirect, state = oauth.google.authorize_redirect(redirect_uri)
-    return json_success({'redirect_url': redirect.headers.get('Location', ''), 'state': state})
+    auth_url, state = oauth.google.create_authorization_url(redirect_uri)
+    return json_success({'redirect_url': auth_url, 'state': state})
 
 
 @api.route('/auth/google/callback', methods=['GET', 'POST'])
