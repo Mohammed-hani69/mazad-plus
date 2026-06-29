@@ -3036,4 +3036,4 @@ def init_database():
 if __name__ == '__main__':
     init_database()
     debug_mode = os.environ.get('FLASK_DEBUG', '0') == '1'
-    app.run(debug=debug_mode, host='0.0.0.0', port=5000)
+    app.run(debug=debug_mode, host='0.0.0.0', port=5002)

@@ -1515,60 +1515,78 @@ def api_lookup_invoice_by_barcode(barcode):
 
 @api.route('/auth/google/url', methods=['GET'])
 def api_google_auth_url():
-    from authlib.integrations.flask_client import OAuth
+    from urllib.parse import urlencode
     google_client_id = current_app.config.get('GOOGLE_CLIENT_ID', '')
     if not google_client_id:
         return json_error('تسجيل الدخول عبر Google غير مفعل')
-    redirect_uri = url_for('api.api_google_callback', _external=True)
-    oauth = OAuth(current_app)
-    oauth.register(
-        name='google',
-        client_id=google_client_id,
-        client_secret=current_app.config.get('GOOGLE_CLIENT_SECRET', ''),
-        access_token_url='https://accounts.google.com/o/oauth2/token',
-        authorize_url='https://accounts.google.com/o/oauth2/auth',
-        api_base_url='https://www.googleapis.com/oauth2/v1/',
-        userinfo_endpoint='https://www.googleapis.com/oauth2/v3/userinfo',
-        client_kwargs={'scope': 'openid email profile'},
-        server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
-    )
-    result = oauth.google.create_authorization_url(redirect_uri)
-    auth_url = result.get('url') or result.get('authorization_url')
-    state = result.get('state')
-    return json_success({'redirect_url': auth_url, 'state': state})
+    redirect_uri = current_app.config.get('GOOGLE_REDIRECT_URI', 'https://mazad-plus.com/api/auth/google/callback')
+    params = urlencode({
+        'client_id': google_client_id,
+        'redirect_uri': redirect_uri,
+        'response_type': 'code',
+        'scope': 'openid email profile',
+        'access_type': 'offline',
+    })
+    auth_url = f'https://accounts.google.com/o/oauth2/v2/auth?{params}'
+    return json_success({'redirect_url': auth_url})
 
 
 @api.route('/auth/google/callback', methods=['GET', 'POST'])
 def api_google_callback():
-    from authlib.integrations.flask_client import OAuth
+    import requests as http_requests
     from urllib.parse import urlencode
     import json as json_lib
     is_get = request.method == 'GET'
     code = request.args.get('code', '') if is_get else _SafeData(request.get_json() or request.form).get('code', '')
-    state = request.args.get('state', '') if is_get else _SafeData(request.get_json() or request.form).get('state', '')
     if not code:
         return json_error('رمز التفويض مطلوب')
-    redirect_uri = url_for('api.api_google_callback', _external=True)
-    oauth = OAuth(current_app)
-    oauth.register(
-        name='google',
-        client_id=current_app.config.get('GOOGLE_CLIENT_ID', ''),
-        client_secret=current_app.config.get('GOOGLE_CLIENT_SECRET', ''),
-        access_token_url='https://accounts.google.com/o/oauth2/token',
-        authorize_url='https://accounts.google.com/o/oauth2/auth',
-        api_base_url='https://www.googleapis.com/oauth2/v1/',
-        userinfo_endpoint='https://www.googleapis.com/oauth2/v3/userinfo',
-        client_kwargs={'scope': 'openid email profile'},
-        server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
-    )
+    redirect_uri = current_app.config.get('GOOGLE_REDIRECT_URI', 'https://mazad-plus.com/api/auth/google/callback')
+    google_client_id = current_app.config.get('GOOGLE_CLIENT_ID', '')
+    google_client_secret = current_app.config.get('GOOGLE_CLIENT_SECRET', '')
+    if not google_client_id or not google_client_secret:
+        return json_error('تسجيل الدخول عبر Google غير مفعل')
     try:
-        atoken = oauth.google.authorize_access_token(code=code, state=state)
-        userinfo = oauth.google.get('https://www.googleapis.com/oauth2/v3/userinfo').json()
+        resp = http_requests.post('https://oauth2.googleapis.com/token', data={
+            'code': code,
+            'client_id': google_client_id,
+            'client_secret': google_client_secret,
+            'redirect_uri': redirect_uri,
+            'grant_type': 'authorization_code',
+        }, headers={'Accept': 'application/json'}, timeout=15)
+        if resp.status_code != 200:
+            current_app.logger.error(f'Google token error: {resp.text}')
+            error_msg = 'فشل تبادل رمز التفويض'
+            if is_get:
+                return redirect(f'mazadplus://auth?error={error_msg}')
+            return json_error(error_msg, 500)
+        token_data = resp.json()
+        id_token = token_data.get('id_token', '')
+        access_token = token_data.get('access_token', '')
+        if not id_token and not access_token:
+            error_msg = 'فشل الحصول على رمز الدخول'
+            if is_get:
+                return redirect(f'mazadplus://auth?error={error_msg}')
+            return json_error(error_msg, 500)
+        userinfo_resp = http_requests.get(
+            'https://www.googleapis.com/oauth2/v3/userinfo',
+            headers={'Authorization': f'Bearer {access_token}'},
+            timeout=10,
+        )
+        if userinfo_resp.status_code != 200:
+            current_app.logger.error(f'Google userinfo error: {userinfo_resp.text}')
+            error_msg = 'فشل الحصول على بيانات المستخدم'
+            if is_get:
+                return redirect(f'mazadplus://auth?error={error_msg}')
+            return json_error(error_msg, 500)
+        userinfo = userinfo_resp.json()
         google_id = userinfo.get('sub')
         email = userinfo.get('email', '').lower()
         name = userinfo.get('name', '')
         if not google_id or not email:
-            return json_error('فشل الحصول على بيانات Google')
+            error_msg = 'فشل الحصول على بيانات Google'
+            if is_get:
+                return redirect(f'mazadplus://auth?error={error_msg}')
+            return json_error(error_msg)
         user = User.query.filter_by(google_id=google_id).first()
         if not user:
             user = User.query.filter_by(email=email).first()
