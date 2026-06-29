@@ -27,6 +27,9 @@ DROPDOWN_LIMIT = 500
 app = Flask(__name__)
 app.config.from_object(Config)
 
+from werkzeug.middleware.proxy_fix import ProxyFix
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1)
+
 db.init_app(app)
 csrf = CSRFProtect(app)
 CORS(app, resources={r"/api/*": {"origins": "*"}})
@@ -451,7 +454,7 @@ def auth_google():
     if not google_client_id or not google_client_secret:
         flash('تسجيل الدخول عبر Google غير مفعل حالياً', 'warning')
         return redirect(url_for('login'))
-    redirect_uri = current_app.config.get('GOOGLE_REDIRECT_URI', url_for('auth_google_callback', _external=True))
+    redirect_uri = url_for('auth_google_callback', _external=True)
     oauth = OAuth(current_app)
     oauth.register(
         name='google',
